@@ -1,92 +1,72 @@
 # Flash Card Generation using AI
 
-A flashcard application that uses Google's Gemini AI to automatically generate comprehensive flashcards for language learning.
+A powerful flashcard application that leverages Google's Gemini AI to help you learn and memorize new words effectively.
 
-![Flashcard AI](app/static/img/preview.png)
+![Flash Card Generation Preview](app/static/img/readme.txt)
 
 ## Features
 
-- **AI-Powered Flashcards**: Generate flashcards from English or Vietnamese words with translations, pronunciation, and example sentences using Gemini AI
-- **Flashcard Management**: Add, edit, and delete flashcards
-- **Study System**: Interactive study mode with spaced repetition learning
-- **CSV Storage**: Simple and portable database format
-- **Additional AI Tools**:
-  - Grammar checking
-  - Text translation
-  - Text summarization
+- **AI-Powered Flashcards**: Create flashcards with Google's Gemini AI automatically generating translations, pronunciation, and example sentences
+- **Flashcard Management**: Create, edit, and delete flashcards as needed
+- **Interactive Study System**: User-friendly interface for studying your flashcards
+- **CSV Storage**: All flashcards are stored in CSV format for easy access and portability
+- **Additional AI Tools**: Grammar checking, text translation, and text summarization tools
 
-## Setup Instructions
+## Setup
 
 ### Prerequisites
 
-- Python 3.8+
-- Google Gemini API key
+- Python 3.8 or higher
+- A Google Gemini API key (get one at [Google AI Studio](https://makersuite.google.com/app/apikey))
 
 ### Installation
 
 1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd FlashCardGeneration
+   ```
+   git clone https://github.com/yourusername/flashcard-generation.git
+   cd flashcard-generation
    ```
 
 2. Install the required packages:
-   ```bash
+   ```
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file in the project root with the following content:
+3. Create a `.env` file in the project root with your Gemini API key:
    ```
-   GEMINI_API_KEY=your_gemini_api_key_here
-   FLASK_SECRET_KEY=generate_a_random_secret_key_here
+   GEMINI_API_KEY=your_api_key_here
    ```
 
 4. Run the application:
-   ```bash
+   ```
    python app.py
    ```
 
-5. Open your browser and navigate to:
-   ```
-   http://127.0.0.1:5000/
-   ```
+5. Open your browser and go to `http://127.0.0.1:5000`
 
 ## Usage
 
-### Creating Flashcards
+1. **Create Flashcards**: Click the "Create Flashcard" button, enter a word, and select the language. The AI will generate translations, pronunciation, and example sentences.
 
-1. Click on "Create Flashcard" in the navigation bar
-2. Enter a word and select its language
-3. Click "Generate Flashcard with AI"
-4. The AI will automatically generate translations, pronunciation, and example sentences
+2. **Study Flashcards**: Navigate to the Study page to review your flashcards.
 
-### Studying Flashcards
+3. **Edit or Delete Flashcards**: Click the edit or delete buttons on any flashcard to modify or remove it.
 
-1. Click on "Study" in the navigation bar
-2. Study your flashcards using the interactive study mode
-3. Mark cards as correct or incorrect to track your progress
-4. Use study settings to customize your learning experience
-
-### Additional AI Tools
-
-- **Grammar Check**: Check your text for grammar errors using AI
-- **AI Translation**: Translate text between languages with AI
-- **Text Summarization**: Generate concise summaries of longer texts
+4. **Use AI Tools**: Access the grammar check, translation, and summarization tools in the Study page.
 
 ## Technologies Used
 
-- Flask (Python web framework)
-- Bootstrap 5 (Frontend styling)
-- Google Generative AI (Gemini API)
-- Pandas (Data handling)
-- jQuery (Frontend interactivity)
+- **Backend**: FastAPI
+- **Frontend**: Bootstrap 5, jQuery
+- **AI**: Google Generative AI (Gemini 2.0 Flash Lite)
+- **Data Management**: Pandas
+- **Deployment**: Uvicorn
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgements
+## Acknowledgments
 
-- Inspired by Quizlet's flashcard learning system
-- Powered by Google's Gemini AI
-- Built with Flask framework 
+- Inspired by Quizlet's flashcard system
+- Powered by Google's Gemini AI 
