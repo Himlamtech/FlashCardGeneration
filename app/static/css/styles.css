@@ -1,20 +1,26 @@
 /* Main Styling */
 :root {
-    --primary-color: #3498db;
-    --secondary-color: #2ecc71;
-    --dark-color: #2c3e50;
-    --light-color: #ecf0f1;
-    --danger-color: #e74c3c;
-    --warning-color: #f39c12;
-    --info-color: #1abc9c;
+    --primary-color: #4a6bff;
+    --primary-light: #e6ebff;
+    --secondary-color: #34d399;
+    --dark-color: #1e293b;
+    --light-color: #f8fafc;
+    --accent-color: #f59e0b;
+    --danger-color: #ef4444;
+    --success-color: #10b981;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-800: #1f2937;
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 80px;
     --transition-speed: 0.3s;
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-color);
+    color: var(--gray-800);
     margin: 0;
     padding: 0;
     overflow-x: hidden;
@@ -144,56 +150,98 @@ body {
 
 /* Flashcard Styling */
 .flashcard {
-    perspective: 1000px;
-    height: 220px;
-    margin-bottom: 30px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 20px;
+    animation: scaleIn 0.4s ease-out;
 }
 
 .flashcard:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.flashcard-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    transition: transform 0.8s;
-    transform-style: preserve-3d;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 10px;
-}
-
-.flashcard.flipped .flashcard-inner {
-    transform: rotateY(180deg);
-}
-
-.flashcard-front, .flashcard-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 20px;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.flashcard-front {
-    background-color: #fff;
-    color: var(--dark-color);
-    border: 1px solid #ddd;
-}
-
-.flashcard-back {
-    background-color: var(--primary-color);
+.flashcard-header {
+    background: var(--primary-color);
     color: white;
-    transform: rotateY(180deg);
-    overflow-y: auto;
+    padding: 15px 20px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flashcard-body {
+    padding: 20px;
+}
+
+.flashcard-word {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--dark-color);
+}
+
+.flashcard-pronunciation {
+    font-style: italic;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.flashcard-section {
+    margin-bottom: 15px;
+}
+
+.flashcard-section-title {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.flashcard-section-title i {
+    margin-right: 8px;
+}
+
+.flashcard-translations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.translation-tag {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.flashcard-examples {
+    background: var(--gray-100);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+}
+
+.example-item {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.example-item:before {
+    content: "•";
+    position: absolute;
+    left: 5px;
+    color: var(--primary-color);
 }
 
 /* Animation Classes */
@@ -568,12 +616,8 @@ body {
 
 /* Keyframes for Animations */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInUp {
@@ -636,4 +680,467 @@ body {
     100% {
         transform: translateY(100vh) rotate(360deg);
     }
+}
+
+/* StudyWAI - Modern UI Styles */
+
+/* Animation Effects */
+@keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Study Page Styles */
+.flip-card-container {
+    perspective: 1000px;
+    height: 350px;
+    margin: 30px auto;
+    max-width: 600px;
+}
+
+.flip-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.flip-card.flipped {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.flip-card-front {
+    background: linear-gradient(135deg, var(--primary-color), #8096ff);
+    color: white;
+}
+
+.flip-card-back {
+    background: white;
+    color: var(--dark-color);
+    transform: rotateY(180deg);
+}
+
+.flip-card-word {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.flip-card-pronunciation {
+    font-size: 1.2rem;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+/* Difficulty buttons */
+.difficulty-btn {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: all 0.2s;
+    margin: 0 5px;
+}
+
+.difficulty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.difficulty-btn.easy {
+    background-color: #34d399;
+    color: white;
+}
+
+.difficulty-btn.medium {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.difficulty-btn.hard {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* Progress Bar */
+.progress {
+    height: 8px;
+    background-color: var(--gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    transition: width 0.5s;
+}
+
+/* AI Tools Styling */
+.ai-tool-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    margin-bottom: 30px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.ai-tool-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 15px;
+}
+
+.ai-tool-header h2 {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.ai-tool-form {
+    margin-bottom: 20px;
+}
+
+.ai-result-container {
+    background-color: var(--gray-100);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    position: relative;
+    animation: scaleIn 0.4s ease-out;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Chatbot Styling */
+.chat-container {
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.chat-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 15px 20px;
+    font-weight: 600;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.message-user {
+    background: var(--primary-light);
+    color: var(--dark-color);
+    align-self: flex-end;
+    border-bottom-right-radius: 0;
+}
+
+.message-ai {
+    background: var(--gray-100);
+    color: var(--dark-color);
+    align-self: flex-start;
+    border-bottom-left-radius: 0;
+}
+
+.chat-input-container {
+    padding: 15px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+}
+
+.chat-input {
+    flex: 1;
+    border: 1px solid var(--gray-300);
+    border-radius: 25px;
+    padding: 10px 15px;
+    margin-right: 10px;
+}
+
+.chat-send-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.chat-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(74, 107, 255, 0.3);
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .flip-card-container {
+        height: 300px;
+    }
+    
+    .flip-card-word {
+        font-size: 2rem;
+    }
+    
+    .ai-tool-container {
+        padding: 15px;
+    }
+}
+
+/* Loading Animation */
+.loading-dots {
+    display: inline-flex;
+    align-items: center;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    margin: 0 3px;
+    opacity: 0.6;
+    animation: loadingDots 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes loadingDots {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* Logo Styles */
+.app-logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+    margin-right: 8px;
+}
+
+.app-logo-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.app-logo-icon {
+    width: 35px;
+    height: 35px;
+    margin-right: 10px;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand .logo-text {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.navbar-brand .logo-subtitle {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    display: block;
+    color: var(--dark-color);
+}
+
+/* Active sidebar styling */
+#sidebar.active {
+    min-width: 80px;
+    max-width: 80px;
+    text-align: center;
+}
+
+#sidebar.active .sidebar-header h3 {
+    display: none;
+}
+
+#sidebar.active .sidebar-header p {
+    display: none;
+}
+
+#sidebar.active ul li a {
+    padding: 15px 10px;
+    text-align: center;
+    display: block;
+}
+
+#sidebar.active ul li a i {
+    margin-right: 0;
+    display: block;
+    font-size: 1.5em;
+    margin-bottom: 5px;
+    width: auto;
+}
+
+#sidebar.active ul li a span {
+    display: none;
+}
+
+#sidebar.active .sidebar-footer {
+    display: none;
+}
+
+#content.active {
+    width: calc(100% - 80px);
+    margin-left: 80px;
+}
+
+/* Collapsible menu animations */
+#flashcardSubmenu {
+    transition: all 0.3s ease;
+}
+
+.flashcard-toggle[aria-expanded="true"] .submenu-icon {
+    transform: rotate(0deg);
+}
+
+.flashcard-toggle[aria-expanded="false"] .submenu-icon {
+    transform: rotate(-90deg);
+}
+
+/* Navbar enhancements */
+.navbar {
+    height: 70px;
+    padding: 0 20px;
+}
+
+.navbar-notification {
+    position: relative;
+    display: inline-block;
+    margin: 0 10px;
+}
+
+.navbar-notification .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.6rem;
+    padding: 3px 5px;
+    border-radius: 50%;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Study progress styles */
+.progress-circle {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(var(--primary-color) 0% var(--percent, 0%), #e9ecef var(--percent, 0%) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-circle::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: white;
+}
+
+.progress-circle .percent {
+    position: relative;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--primary-color);
 } 

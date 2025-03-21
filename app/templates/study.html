@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Study - FlashCard Generation{% endblock %}
+{% block title %}Study Flashcards - StudyWAI{% endblock %}
 
 {% block head %}
 <style>
@@ -90,267 +90,286 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h1 class="display-5 mb-0">Study Flashcards</h1>
-                <a href="/" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Back to List
+                <h1 class="display-5 mb-0">
+                    <i class="bi bi-book text-primary me-2"></i> Study Flashcards
+                </h1>
+                <a href="{{ url_for('home') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Back to List
                 </a>
             </div>
             <hr>
         </div>
     </div>
 
+    {% if flashcards|length == 0 %}
     <div class="row">
-        {% if flashcards|length > 0 %}
-        <div class="col-lg-8 mx-auto">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Card <span id="currentCardNum">1</span> of <span id="totalCards">{{ flashcards|length }}</span></h5>
-                    <div>
-                        <span class="badge bg-primary" id="progressBadge">0%</span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="flashcard-container">
-                        <div class="flashcard-wrapper" id="flashcardWrapper">
-                            <div class="flashcard-side flashcard-front">
-                                <div class="flashcard-content">
-                                    <p class="flashcard-question" id="cardFront"></p>
-                                </div>
-                                <div class="mt-4">
-                                    <button class="btn btn-outline-primary" id="flipBtn">
-                                        <i class="bi bi-arrow-repeat me-2"></i>Flip Card
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flashcard-side flashcard-back">
-                                <div class="flashcard-content">
-                                    <div class="flashcard-answer markdown-content" id="cardBack"></div>
-                                </div>
-                                <div class="mt-4">
-                                    <button class="btn btn-outline-primary" id="backFlipBtn">
-                                        <i class="bi bi-arrow-repeat me-2"></i>Flip Card
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="study-controls">
-                        <button class="btn btn-secondary" id="prevBtn" disabled>
-                            <i class="bi bi-arrow-left me-2"></i>Previous
-                        </button>
-                        <div class="btn-group">
-                            <button class="btn btn-danger" id="hardBtn">
-                                <i class="bi bi-emoji-frown me-2"></i>Hard
-                            </button>
-                            <button class="btn btn-warning" id="mediumBtn">
-                                <i class="bi bi-emoji-neutral me-2"></i>Medium
-                            </button>
-                            <button class="btn btn-success" id="easyBtn">
-                                <i class="bi bi-emoji-smile me-2"></i>Easy
-                            </button>
-                        </div>
-                        <button class="btn btn-primary" id="nextBtn">
-                            <i class="bi bi-arrow-right me-2"></i>Next
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Study Progress</h5>
-                </div>
-                <div class="card-body">
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" id="progressBar" role="progressbar" style="width: 0%"></div>
-                    </div>
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div class="h4 mb-0" id="easyCount">0</div>
-                            <div class="text-success">Easy</div>
-                        </div>
-                        <div class="col-4">
-                            <div class="h4 mb-0" id="mediumCount">0</div>
-                            <div class="text-warning">Medium</div>
-                        </div>
-                        <div class="col-4">
-                            <div class="h4 mb-0" id="hardCount">0</div>
-                            <div class="text-danger">Hard</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% else %}
         <div class="col-12">
-            <div class="card text-center py-5 shadow-sm">
-                <div class="card-body">
-                    <i class="bi bi-card-heading display-1 text-muted mb-3"></i>
-                    <h3>No flashcards available</h3>
-                    <p class="text-muted">You need to create flashcards first</p>
-                    <a href="/create" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Create Flashcard
-                    </a>
+            <div class="ai-tool-container text-center py-5">
+                <i class="bi bi-emoji-smile fs-1 text-muted mb-3"></i>
+                <h3>No flashcards to study yet</h3>
+                <p class="text-muted">Create some flashcards first to start studying.</p>
+                <a href="{{ url_for('create_get') }}" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-lg"></i> Create Flashcards
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card-counter text-center mb-4">
+                <span class="badge bg-primary p-2">Card <span id="currentCard">1</span> of {{ flashcards|length }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="flip-card-container">
+                <div class="flip-card" id="flashcardElement">
+                    <div class="flip-card-front" id="cardFront">
+                        <span class="badge bg-light text-primary position-absolute top-0 end-0 m-3">
+                            <i class="bi bi-hand-index-thumb"></i> Click to flip
+                        </span>
+                        <div class="flip-card-word">{{ flashcards[0].word }}</div>
+                        <div class="flip-card-pronunciation">{{ flashcards[0].pronunciation or "No pronunciation available" }}</div>
+                        <div class="mt-auto">
+                            <div class="small text-light opacity-75">Click to reveal translations and examples</div>
+                        </div>
+                    </div>
+                    <div class="flip-card-back" id="cardBack">
+                        <div class="w-100">
+                            <h4 class="mb-3 text-primary">Translations</h4>
+                            <div class="flashcard-translations mb-4">
+                                {% if flashcards[0].translations %}
+                                    {% for translation in flashcards[0].translations.split(',') %}
+                                        <span class="translation-tag">{{ translation.strip() }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="translation-tag">No translations available</span>
+                                {% endif %}
+                            </div>
+                            
+                            <h4 class="mb-2 text-primary">Examples</h4>
+                            <div class="flashcard-examples">
+                                {% if flashcards[0].examples %}
+                                    {% for example in flashcards[0].examples.split('\n') %}
+                                        {% if example.strip() %}
+                                            <div class="example-item">{{ example.strip() }}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="example-item">No examples available</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        {% endif %}
     </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="text-center my-3">
+                <p>How well did you know this?</p>
+                <button class="difficulty-btn easy" onclick="markDifficulty('easy')">
+                    <i class="bi bi-emoji-smile"></i> Easy
+                </button>
+                <button class="difficulty-btn medium" onclick="markDifficulty('medium')">
+                    <i class="bi bi-emoji-neutral"></i> Medium
+                </button>
+                <button class="difficulty-btn hard" onclick="markDifficulty('hard')">
+                    <i class="bi bi-emoji-frown"></i> Hard
+                </button>
+            </div>
+
+            <div class="card mt-4 mb-4 bg-white">
+                <div class="card-body">
+                    <h5 class="card-title">Study Progress</h5>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 0%" id="easyProgress">
+                            <span id="easyCount">0</span>
+                        </div>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" id="mediumProgress">
+                            <span id="mediumCount">0</span>
+                        </div>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" id="hardProgress">
+                            <span id="hardCount">0</span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <div>
+                            <i class="bi bi-emoji-smile text-success"></i> Easy: <span id="easyLabel">0</span>
+                        </div>
+                        <div>
+                            <i class="bi bi-emoji-neutral text-warning"></i> Medium: <span id="mediumLabel">0</span>
+                        </div>
+                        <div>
+                            <i class="bi bi-emoji-frown text-danger"></i> Hard: <span id="hardLabel">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button class="btn btn-outline-secondary" id="prevBtn" disabled>
+                    <i class="bi bi-arrow-left"></i> Previous
+                </button>
+                <button class="btn btn-primary" id="nextBtn">
+                    Next <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
-{% if flashcards|length > 0 %}
 <script>
-    const flashcards = [
-        {% for flashcard in flashcards %}
-        {
-            id: "{{ flashcard.id }}",
-            front: "{{ flashcard.front|replace('\n', ' ')|replace('"', '\\"') }}",
-            back: "{{ flashcard.back|replace('\n', ' ')|replace('"', '\\"') }}"
-        }{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
-    
-    let currentCardIndex = 0;
-    let totalCards = flashcards.length;
+document.addEventListener('DOMContentLoaded', function() {
+    const flashcards = {{ flashcards|tojson }};
+    let currentIndex = 0;
     let progress = {
         easy: 0,
         medium: 0,
-        hard: 0,
-        total: 0
+        hard: 0
     };
     
-    // Get DOM elements
+    const flashcardElement = document.getElementById('flashcardElement');
     const cardFront = document.getElementById('cardFront');
     const cardBack = document.getElementById('cardBack');
-    const flashcardWrapper = document.getElementById('flashcardWrapper');
-    const currentCardNum = document.getElementById('currentCardNum');
-    const totalCardsEl = document.getElementById('totalCards');
-    const progressBar = document.getElementById('progressBar');
-    const progressBadge = document.getElementById('progressBadge');
+    const currentCardElement = document.getElementById('currentCard');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
-    const flipBtn = document.getElementById('flipBtn');
-    const backFlipBtn = document.getElementById('backFlipBtn');
-    const easyBtn = document.getElementById('easyBtn');
-    const mediumBtn = document.getElementById('mediumBtn');
-    const hardBtn = document.getElementById('hardBtn');
-    const easyCount = document.getElementById('easyCount');
-    const mediumCount = document.getElementById('mediumCount');
-    const hardCount = document.getElementById('hardCount');
     
-    // Initialize the first card
-    function initializeCards() {
-        if (flashcards.length > 0) {
-            showCard(currentCardIndex);
-            totalCardsEl.textContent = totalCards;
-            updateProgress();
-        }
+    if (flashcards.length === 0) {
+        return;
     }
     
-    // Show a specific card
-    function showCard(index) {
-        // Reset the flip state
-        flashcardWrapper.classList.remove('flipped');
-        
-        // Update the current card
-        currentCardIndex = index;
-        currentCardNum.textContent = index + 1;
-        
-        // Update button states
-        prevBtn.disabled = currentCardIndex === 0;
-        nextBtn.disabled = currentCardIndex === totalCards - 1;
-        
-        // Set card content
-        const currentCard = flashcards[currentCardIndex];
-        cardFront.textContent = currentCard.front;
-        cardBack.textContent = currentCard.back;
-        
-        // Highlight next button if card is flipped
-        if (flashcardWrapper.classList.contains('flipped')) {
-            nextBtn.classList.add('highlight-btn');
-        } else {
-            nextBtn.classList.remove('highlight-btn');
-            flipBtn.classList.add('highlight-btn');
-        }
-        
-        // Render markdown in the back content
-        document.querySelectorAll('.markdown-content').forEach(function(element) {
-            element.innerHTML = marked.parse(element.textContent);
+    // Flip card when clicked
+    if (flashcardElement) {
+        flashcardElement.addEventListener('click', function() {
+            flashcardElement.classList.toggle('flipped');
         });
     }
     
-    // Update progress display
-    function updateProgress() {
-        const progressPercent = Math.round((progress.total / totalCards) * 100);
-        progressBar.style.width = `${progressPercent}%`;
-        progressBadge.textContent = `${progressPercent}%`;
-        
-        easyCount.textContent = progress.easy;
-        mediumCount.textContent = progress.medium;
-        hardCount.textContent = progress.hard;
-    }
-    
-    // Event listeners
-    flipBtn.addEventListener('click', function() {
-        flashcardWrapper.classList.add('flipped');
-        flipBtn.classList.remove('highlight-btn');
-        nextBtn.classList.add('highlight-btn');
-    });
-    
-    backFlipBtn.addEventListener('click', function() {
-        flashcardWrapper.classList.remove('flipped');
-    });
-    
-    prevBtn.addEventListener('click', function() {
-        if (currentCardIndex > 0) {
-            showCard(currentCardIndex - 1);
-        }
-    });
-    
-    nextBtn.addEventListener('click', function() {
-        if (currentCardIndex < totalCards - 1) {
-            showCard(currentCardIndex + 1);
-        }
-    });
-    
-    // Difficulty rating buttons
-    function handleDifficulty(difficulty) {
-        // Only count each card once
-        if (!flashcards[currentCardIndex].rated) {
-            flashcards[currentCardIndex].rated = true;
-            progress[difficulty]++;
-            progress.total++;
-            updateProgress();
-        }
-        
-        // Move to next card if available
-        if (currentCardIndex < totalCards - 1) {
-            showCard(currentCardIndex + 1);
-        } else {
-            // Show completion message if all cards done
-            if (progress.total === totalCards) {
-                setTimeout(() => {
-                    alert('Congratulations! You have completed all flashcards.');
-                }, 500);
+    // Handle navigation
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
             }
-        }
+        });
     }
     
-    easyBtn.addEventListener('click', function() {
-        handleDifficulty('easy');
-    });
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+            if (currentIndex < flashcards.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        });
+    }
     
-    mediumBtn.addEventListener('click', function() {
-        handleDifficulty('medium');
-    });
+    // Mark difficulty function
+    window.markDifficulty = function(difficulty) {
+        progress[difficulty]++;
+        updateProgress();
+        
+        // Automatically go to next card if not the last one
+        if (currentIndex < flashcards.length - 1) {
+            setTimeout(() => {
+                currentIndex++;
+                updateCard();
+            }, 500);
+        }
+    };
     
-    hardBtn.addEventListener('click', function() {
-        handleDifficulty('hard');
-    });
+    function updateCard() {
+        const flashcard = flashcards[currentIndex];
+        
+        // Make sure the card is showing the front side when changing cards
+        flashcardElement.classList.remove('flipped');
+        
+        // Update front of card
+        cardFront.querySelector('.flip-card-word').textContent = flashcard.word;
+        cardFront.querySelector('.flip-card-pronunciation').textContent = 
+            flashcard.pronunciation || "No pronunciation available";
+        
+        // Update back of card
+        const translationsContainer = cardBack.querySelector('.flashcard-translations');
+        translationsContainer.innerHTML = '';
+        
+        if (flashcard.translations) {
+            const translations = flashcard.translations.split(',');
+            translations.forEach(translation => {
+                if (translation.trim()) {
+                    const span = document.createElement('span');
+                    span.className = 'translation-tag';
+                    span.textContent = translation.trim();
+                    translationsContainer.appendChild(span);
+                }
+            });
+        } else {
+            const span = document.createElement('span');
+            span.className = 'translation-tag';
+            span.textContent = 'No translations available';
+            translationsContainer.appendChild(span);
+        }
+        
+        const examplesContainer = cardBack.querySelector('.flashcard-examples');
+        examplesContainer.innerHTML = '';
+        
+        if (flashcard.examples) {
+            const examples = flashcard.examples.split('\n');
+            examples.forEach(example => {
+                if (example.trim()) {
+                    const div = document.createElement('div');
+                    div.className = 'example-item';
+                    div.textContent = example.trim();
+                    examplesContainer.appendChild(div);
+                }
+            });
+        } else {
+            const div = document.createElement('div');
+            div.className = 'example-item';
+            div.textContent = 'No examples available';
+            examplesContainer.appendChild(div);
+        }
+        
+        // Update UI
+        currentCardElement.textContent = currentIndex + 1;
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex === flashcards.length - 1;
+    }
     
-    // Initialize the flashcards
-    initializeCards();
+    function updateProgress() {
+        const total = flashcards.length;
+        const easyPercent = (progress.easy / total * 100) || 0;
+        const mediumPercent = (progress.medium / total * 100) || 0;
+        const hardPercent = (progress.hard / total * 100) || 0;
+        
+        document.getElementById('easyProgress').style.width = `${easyPercent}%`;
+        document.getElementById('mediumProgress').style.width = `${mediumPercent}%`;
+        document.getElementById('hardProgress').style.width = `${hardPercent}%`;
+        
+        document.getElementById('easyCount').textContent = progress.easy;
+        document.getElementById('mediumCount').textContent = progress.medium;
+        document.getElementById('hardCount').textContent = progress.hard;
+        
+        document.getElementById('easyLabel').textContent = progress.easy;
+        document.getElementById('mediumLabel').textContent = progress.medium;
+        document.getElementById('hardLabel').textContent = progress.hard;
+    }
+    
+    // Initial setup
+    updateCard();
+    updateProgress();
+});
 </script>
-{% endif %}
 {% endblock %} 

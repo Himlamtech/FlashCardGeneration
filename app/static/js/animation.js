@@ -1,131 +1,157 @@
 /**
- * Animation utilities for FlashCard Generation app
+ * StudyWAI - Animation and Interaction Scripts
+ * Enhances the user interface with modern animations and effects
  */
 
-// Initialize animations when document is ready
 document.addEventListener('DOMContentLoaded', function() {
-    initializeAnimations();
-    initializeScrollEffects();
-});
-
-// Card animations
-function initializeAnimations() {
-    // Animate cards on page load
-    const cards = document.querySelectorAll('.card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            card.style.transition = 'all 0.5s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, 100 + (index * 100)); // Stagger the animations
+    // Initialize all tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    
-    // Add hover effects to buttons
+
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.card, .flashcard');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+        });
+    });
+
+    // Add staggered animations to lists
+    const animateStaggered = (elements, className, delay = 100) => {
+        elements.forEach((el, index) => {
+            setTimeout(() => {
+                el.classList.add(className);
+            }, index * delay);
+        });
+    };
+
+    // Animate section titles with slide-in effect
+    const sectionTitles = document.querySelectorAll('.flashcard-section-title, h1, h2');
+    animateStaggered(sectionTitles, 'fade-in-element', 150);
+
+    // Add subtle animation to buttons
     const buttons = document.querySelectorAll('.btn');
     buttons.forEach(button => {
         button.addEventListener('mouseenter', function() {
-            this.style.transition = 'all 0.3s ease';
             this.style.transform = 'translateY(-2px)';
-            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
         });
         
         button.addEventListener('mouseleave', function() {
-            this.style.transition = 'all 0.3s ease';
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = 'none';
+            this.style.transform = '';
         });
     });
+
+    // Create a ripple effect on button clicks
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const rect = button.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.width = '0';
+            ripple.style.height = '0';
+            ripple.style.borderRadius = '50%';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            
+            button.appendChild(ripple);
+            
+            ripple.style.animation = 'ripple-effect 0.6s linear';
+            ripple.addEventListener('animationend', function() {
+                ripple.remove();
+            });
+        });
+    });
+
+    // Add keyframe animation for ripple effect to the document
+    if (!document.querySelector('#ripple-animation')) {
+        const style = document.createElement('style');
+        style.id = 'ripple-animation';
+        style.textContent = `
+        @keyframes ripple-effect {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 0.5;
+            }
+            100% {
+                width: 500px;
+                height: 500px;
+                opacity: 0;
+            }
+        }`;
+        document.head.appendChild(style);
+    }
+
+    // Sidebar toggle animation enhancement
+    const sidebarCollapse = document.getElementById('sidebarCollapse');
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('content');
     
-    // Animation for flashcard flip
-    const flipButtons = document.querySelectorAll('#flipBtn, #backFlipBtn');
-    flipButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const wrapper = document.getElementById('flashcardWrapper');
-            if (wrapper) {
-                wrapper.style.transition = 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    if (sidebarCollapse && sidebar && content) {
+        sidebarCollapse.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            content.classList.toggle('active');
+            
+            // Add rotation to the toggle icon
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.style.transition = 'transform 0.3s ease';
+                icon.style.transform = sidebar.classList.contains('active') ? 'rotate(180deg)' : '';
             }
         });
-    });
-}
+    }
 
-// Scroll-based animations
-function initializeScrollEffects() {
-    // Only run if IntersectionObserver is supported
-    if ('IntersectionObserver' in window) {
-        const appearOptions = {
-            threshold: 0.15,
-            rootMargin: '0px 0px -100px 0px'
-        };
-        
-        const appearOnScroll = new IntersectionObserver(function(entries, observer) {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) return;
-                
-                entry.target.classList.add('fade-in-element');
-                observer.unobserve(entry.target);
-            });
-        }, appearOptions);
-        
-        // Apply to elements with scroll-animate class
-        document.querySelectorAll('.scroll-animate').forEach(element => {
-            element.style.opacity = '0';
-            element.style.transform = 'translateY(20px)';
-            appearOnScroll.observe(element);
+    // Add subtle parallax effect to flashcards on mouse move
+    const flashcards = document.querySelectorAll('.flashcard');
+    flashcards.forEach(card => {
+        card.addEventListener('mousemove', function(e) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const deltaX = (x - centerX) / centerX;
+            const deltaY = (y - centerY) / centerY;
+            
+            card.style.transition = 'transform 0.1s ease-out';
+            card.style.transform = `perspective(1000px) rotateY(${deltaX * 2}deg) rotateX(${-deltaY * 2}deg)`;
         });
-    }
-}
+        
+        card.addEventListener('mouseleave', function() {
+            card.style.transition = 'transform 0.5s ease';
+            card.style.transform = 'perspective(1000px) rotateY(0) rotateX(0)';
+        });
+    });
 
-// Add pulse animation to an element
-function addPulseEffect(element) {
-    element.classList.add('pulse-animation');
+    // Add scroll reveal animation
+    const revealElements = document.querySelectorAll('.ai-tool-container, .card, .flashcard');
+    const revealOnScroll = function() {
+        for (let i = 0; i < revealElements.length; i++) {
+            const windowHeight = window.innerHeight;
+            const elementTop = revealElements[i].getBoundingClientRect().top;
+            const elementVisible = 150;
+            
+            if (elementTop < windowHeight - elementVisible) {
+                revealElements[i].classList.add('fade-in-element');
+            }
+        }
+    };
     
-    // Remove animation after it completes to allow it to be triggered again
-    setTimeout(() => {
-        element.classList.remove('pulse-animation');
-    }, 1000);
-}
-
-// Add shake animation to an element
-function addShakeEffect(element) {
-    element.classList.add('shake-animation');
-    
-    // Remove animation after it completes
-    setTimeout(() => {
-        element.classList.remove('shake-animation');
-    }, 800);
-}
-
-// Confetti animation for achievements
-function showConfetti() {
-    const confettiContainer = document.createElement('div');
-    confettiContainer.classList.add('confetti-container');
-    document.body.appendChild(confettiContainer);
-    
-    // Create confetti pieces
-    for (let i = 0; i < 100; i++) {
-        const confetti = document.createElement('div');
-        confetti.classList.add('confetti');
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.animationDelay = Math.random() * 3 + 's';
-        confetti.style.backgroundColor = getRandomColor();
-        confettiContainer.appendChild(confetti);
-    }
-    
-    // Remove confetti after animation completes
-    setTimeout(() => {
-        document.body.removeChild(confettiContainer);
-    }, 6000);
-}
-
-// Get random color for confetti
-function getRandomColor() {
-    const colors = [
-        '#f94144', '#f3722c', '#f8961e', 
-        '#f9c74f', '#90be6d', '#43aa8b', 
-        '#4d908e', '#577590', '#277da1'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-} 
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll(); // Initial check
+}); 
