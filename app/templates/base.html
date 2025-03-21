@@ -14,64 +14,293 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
     
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar {
+            min-width: 250px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            height: 100%;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 20px;
+            z-index: 1000;
+        }
+        
+        .sidebar .logo {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .sidebar .nav-link {
+            padding: 12px 20px;
+            color: #495057;
+            border-radius: 0;
+            margin: 2px 0;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #e9ecef;
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        
+        .sidebar .category {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: bold;
+            padding: 15px 20px 5px;
+        }
+        
+        .content-wrapper {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        footer {
+            margin-top: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .content-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-brain me-2"></i>
-                AI Flash Cards
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo">
+            <a class="text-decoration-none" href="/">
+                <i class="fas fa-brain me-2 text-primary"></i>
+                <span class="fw-bold fs-4">AI Flash Cards</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
-                            <i class="fas fa-home me-1"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/create' %}active{% endif %}" href="/create">
-                            <i class="fas fa-plus-circle me-1"></i> Create Flashcard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/study' %}active{% endif %}" href="/study">
-                            <i class="fas fa-book-reader me-1"></i> Study
-                        </a>
-                    </li>
-                </ul>
-            </div>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container my-4">
-        {% if error %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ error }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
         
-        {% block content %}{% endblock %}
+        <div class="category">Main</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if nav_info.current_path == '/' %}active{% endif %}" href="/">
+                    <i class="fas fa-home me-2"></i> Home
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if nav_info.current_path == '/study' %}active{% endif %}" href="/study">
+                    <i class="fas fa-book-reader me-2"></i> Study
+                </a>
+            </li>
+        </ul>
+        
+        <div class="category">Create & Manage</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if nav_info.current_path == '/create' %}active{% endif %}" href="/create">
+                    <i class="fas fa-plus-circle me-2"></i> Create Flashcard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;">
+                    <i class="fas fa-folder me-2"></i> My Sets
+                </a>
+            </li>
+        </ul>
+        
+        <div class="category">AI Tools</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="#grammarModal" data-bs-toggle="modal">
+                    <i class="fas fa-spell-check me-2"></i> Grammar Check
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#translateModal" data-bs-toggle="modal">
+                    <i class="fas fa-language me-2"></i> Translate
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#summarizeModal" data-bs-toggle="modal">
+                    <i class="fas fa-compress-alt me-2"></i> Summarize
+                </a>
+            </li>
+        </ul>
+        
+        <div class="category">Settings</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;">
+                    <i class="fas fa-cog me-2"></i> Preferences
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;">
+                    <i class="fas fa-question-circle me-2"></i> Help
+                </a>
+            </li>
+        </ul>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer mt-auto py-3 bg-light">
-        <div class="container text-center">
-            <span class="text-muted">
-                &copy; {{ now.year }} AI Flash Card Generator | 
-                <a href="https://github.com/username/flashcard-generator" target="_blank" class="text-decoration-none">
-                    <i class="fab fa-github me-1"></i>GitHub
-                </a>
-            </span>
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Main Content -->
+        <div class="main-content">
+            {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
         </div>
-    </footer>
+
+        <!-- Footer -->
+        <footer class="footer py-3 bg-light">
+            <div class="container text-center">
+                <span class="text-muted">
+                    &copy; {{ now.year }} AI Flash Card Generator | 
+                    <a href="https://github.com/username/flashcard-generator" target="_blank" class="text-decoration-none">
+                        <i class="fab fa-github me-1"></i>GitHub
+                    </a>
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal for Grammar Check -->
+    <div class="modal fade" id="grammarModal" tabindex="-1" aria-labelledby="grammarModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="grammarModalLabel">Grammar Check</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="grammarForm">
+                        <div class="mb-3">
+                            <label for="grammarText" class="form-label">Enter text to check</label>
+                            <textarea class="form-control" id="grammarText" rows="5" required></textarea>
+                        </div>
+                        <div id="grammarResult" class="d-none">
+                            <h6>Result:</h6>
+                            <div class="alert alert-success" id="grammarOutput"></div>
+                            <h6>Errors found:</h6>
+                            <ul id="grammarErrors" class="list-group"></ul>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="checkGrammarBtn">Check Grammar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Translation -->
+    <div class="modal fade" id="translateModal" tabindex="-1" aria-labelledby="translateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="translateModalLabel">Translate Text</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="translateForm">
+                        <div class="mb-3">
+                            <label for="translateText" class="form-label">Enter text to translate</label>
+                            <textarea class="form-control" id="translateText" rows="3" required></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="sourceLang" class="form-label">Source Language</label>
+                                <select class="form-select" id="sourceLang">
+                                    <option value="english">English</option>
+                                    <option value="spanish">Spanish</option>
+                                    <option value="french">French</option>
+                                    <option value="german">German</option>
+                                    <option value="italian">Italian</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label for="targetLang" class="form-label">Target Language</label>
+                                <select class="form-select" id="targetLang">
+                                    <option value="french">French</option>
+                                    <option value="spanish">Spanish</option>
+                                    <option value="english">English</option>
+                                    <option value="german">German</option>
+                                    <option value="italian">Italian</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="translateResult" class="d-none">
+                            <h6>Translation:</h6>
+                            <div class="alert alert-success" id="translationOutput"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="translateBtn">Translate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Summarization -->
+    <div class="modal fade" id="summarizeModal" tabindex="-1" aria-labelledby="summarizeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="summarizeModalLabel">Summarize Text</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="summarizeForm">
+                        <div class="mb-3">
+                            <label for="summarizeText" class="form-label">Enter text to summarize</label>
+                            <textarea class="form-control" id="summarizeText" rows="5" required></textarea>
+                        </div>
+                        <div id="summarizeResult" class="d-none">
+                            <h6>Summary:</h6>
+                            <div class="alert alert-success" id="summaryOutput"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="summarizeBtn">Summarize</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -81,6 +310,76 @@
     
     <!-- Custom JS -->
     <script src="{{ url_for('static', path='/js/scripts.js') }}"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Grammar Check
+            $('#checkGrammarBtn').click(function() {
+                const text = $('#grammarText').val();
+                if (text) {
+                    $.ajax({
+                        url: '/api/check-grammar',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ text: text }),
+                        success: function(response) {
+                            $('#grammarOutput').text(response.corrected_text);
+                            $('#grammarErrors').empty();
+                            if (response.errors.length > 0) {
+                                response.errors.forEach(error => {
+                                    $('#grammarErrors').append(`<li class="list-group-item">${error}</li>`);
+                                });
+                            } else {
+                                $('#grammarErrors').append(`<li class="list-group-item">No errors found</li>`);
+                            }
+                            $('#grammarResult').removeClass('d-none');
+                        }
+                    });
+                }
+            });
+            
+            // Translation
+            $('#translateBtn').click(function() {
+                const text = $('#translateText').val();
+                const sourceLang = $('#sourceLang').val();
+                const targetLang = $('#targetLang').val();
+                
+                if (text) {
+                    $.ajax({
+                        url: '/api/translate',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ 
+                            text: text,
+                            source_lang: sourceLang,
+                            target_lang: targetLang
+                        }),
+                        success: function(response) {
+                            $('#translationOutput').text(response.translated_text);
+                            $('#translateResult').removeClass('d-none');
+                        }
+                    });
+                }
+            });
+            
+            // Summarization
+            $('#summarizeBtn').click(function() {
+                const text = $('#summarizeText').val();
+                if (text) {
+                    $.ajax({
+                        url: '/api/summarize',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ text: text }),
+                        success: function(response) {
+                            $('#summaryOutput').text(response.summary);
+                            $('#summarizeResult').removeClass('d-none');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

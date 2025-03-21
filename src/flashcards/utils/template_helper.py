@@ -7,5 +7,5 @@ def get_common_context() -> Dict[str, Any]:
     """
     return {
         "now": {"year": datetime.now().year},
-        "request": {"path": ""}  # Will be updated in routes
+        "nav_info": {"current_path": ""}  # Will be updated in routes
     } 

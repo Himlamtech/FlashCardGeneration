@@ -5,16 +5,16 @@
 {% block content %}
 <div class="card mb-4">
     <div class="card-body">
-        <h1 class="card-title text-center mb-4">
+        <h1 class="card-title mb-4">
             <i class="fas fa-book-reader text-primary me-2"></i>Study Mode
         </h1>
-        <p class="lead text-center">Review your flashcards to enhance your learning</p>
+        <p class="lead">Review your flashcards to enhance your learning</p>
     </div>
 </div>
 
 {% if flashcards %}
 <div class="row justify-content-center mb-5">
-    <div class="col-lg-8">
+    <div class="col-12">
         <div class="card shadow mb-4">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Flashcards</h4>
@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="card-body p-0">
-                <div id="flashcard-container">
+                <div id="flashcard-container" class="p-5">
                     <!-- Flashcard content will be inserted here by JavaScript -->
                 </div>
             </div>
@@ -46,63 +46,6 @@
                     <button id="hide-answer-btn" class="btn btn-secondary" style="display: none;">
                         <i class="fas fa-eye-slash me-1"></i> Hide Answer
                     </button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="d-flex justify-content-center">
-            <a href="/" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to Home
-            </a>
-        </div>
-    </div>
-    
-    <div class="col-lg-4">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0"><i class="fas fa-tools me-2"></i>AI Tools</h4>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <h5><i class="fas fa-spell-check text-success me-2"></i>Grammar Check</h5>
-                    <textarea id="grammar-text" class="form-control mb-2" rows="3" placeholder="Enter text to check grammar..."></textarea>
-                    <button id="check-grammar-btn" class="btn btn-sm btn-outline-success">Check Grammar</button>
-                    <div id="grammar-result" class="mt-2" style="display: none;"></div>
-                </div>
-                
-                <hr>
-                
-                <div class="mb-3">
-                    <h5><i class="fas fa-language text-primary me-2"></i>Translate</h5>
-                    <div class="input-group mb-2">
-                        <select id="source-lang" class="form-select">
-                            <option value="english" selected>English</option>
-                            <option value="vietnamese">Vietnamese</option>
-                            <option value="spanish">Spanish</option>
-                            <option value="french">French</option>
-                            <option value="german">German</option>
-                        </select>
-                        <span class="input-group-text">to</span>
-                        <select id="target-lang" class="form-select">
-                            <option value="english">English</option>
-                            <option value="vietnamese" selected>Vietnamese</option>
-                            <option value="spanish">Spanish</option>
-                            <option value="french">French</option>
-                            <option value="german">German</option>
-                        </select>
-                    </div>
-                    <textarea id="translate-text" class="form-control mb-2" rows="3" placeholder="Enter text to translate..."></textarea>
-                    <button id="translate-btn" class="btn btn-sm btn-outline-primary">Translate</button>
-                    <div id="translate-result" class="mt-2" style="display: none;"></div>
-                </div>
-                
-                <hr>
-                
-                <div>
-                    <h5><i class="fas fa-file-alt text-info me-2"></i>Summarize</h5>
-                    <textarea id="summarize-text" class="form-control mb-2" rows="3" placeholder="Enter text to summarize..."></textarea>
-                    <button id="summarize-btn" class="btn btn-sm btn-outline-info">Summarize</button>
-                    <div id="summarize-result" class="mt-2" style="display: none;"></div>
                 </div>
             </div>
         </div>
@@ -135,29 +78,29 @@
             $('#current-card').text(index + 1);
             
             let html = `
-                <div class="flashcard p-4">
+                <div class="flashcard">
                     <div class="flashcard-front">
-                        <h2 class="text-center mb-3">${card.word}</h2>
-                        <p class="text-center text-muted">${card.language}</p>
+                        <h1 class="text-center display-4 mb-3">${card.word}</h1>
+                        <p class="text-center text-muted fs-5">${card.language}</p>
                     </div>
                     <div class="flashcard-back" style="display: none;">
-                        <div class="mb-3">
-                            <h5><i class="fas fa-volume-up text-primary me-2"></i>Pronunciation:</h5>
-                            <p>${card.pronunciation || 'Not available'}</p>
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-volume-up text-primary me-2"></i>Pronunciation:</h5>
+                            <p class="fs-5 ps-3">${card.pronunciation || 'Not available'}</p>
                         </div>
-                        <div class="mb-3">
-                            <h5><i class="fas fa-language text-primary me-2"></i>Translations:</h5>
-                            <p>${card.translations || 'Not available'}</p>
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2"><i class="fas fa-language text-primary me-2"></i>Translations:</h5>
+                            <p class="fs-5 ps-3">${card.translations || 'Not available'}</p>
                         </div>
                         <div>
-                            <h5><i class="fas fa-quote-left text-primary me-2"></i>Examples:</h5>
+                            <h5 class="border-bottom pb-2"><i class="fas fa-quote-left text-primary me-2"></i>Examples:</h5>
                             <ul class="list-group list-group-flush">`;
             
             if (card.examples) {
                 const examples = card.examples.split(';');
                 examples.forEach(example => {
                     if (example.trim()) {
-                        html += `<li class="list-group-item">${example.trim()}</li>`;
+                        html += `<li class="list-group-item fs-5 ps-3">${example.trim()}</li>`;
                     }
                 });
             } else {
@@ -217,138 +160,6 @@
             $(this).hide();
             $('#show-answer-btn').show();
             showingAnswer = false;
-        });
-        
-        // AI Tool Functions
-        $('#check-grammar-btn').click(function() {
-            const text = $('#grammar-text').val().trim();
-            if (!text) return;
-            
-            $(this).prop('disabled', true);
-            $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Checking...');
-            
-            $.ajax({
-                url: '/api/check-grammar',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ text: text }),
-                success: function(data) {
-                    let html = `
-                        <div class="alert alert-success">
-                            <h6>Corrected Text:</h6>
-                            <p>${data.corrected_text}</p>
-                        </div>
-                    `;
-                    
-                    if (data.errors && data.errors !== "No errors found") {
-                        html += `
-                            <div class="alert alert-warning">
-                                <h6>Errors Found:</h6>
-                                <ul>
-                        `;
-                        
-                        const errors = data.errors.split(';');
-                        errors.forEach(error => {
-                            if (error.trim()) {
-                                html += `<li>${error.trim()}</li>`;
-                            }
-                        });
-                        
-                        html += `
-                                </ul>
-                            </div>
-                        `;
-                    }
-                    
-                    $('#grammar-result').html(html).show();
-                },
-                error: function(err) {
-                    $('#grammar-result').html(`
-                        <div class="alert alert-danger">
-                            Error: ${err.responseJSON?.detail || 'Could not check grammar'}
-                        </div>
-                    `).show();
-                },
-                complete: function() {
-                    $('#check-grammar-btn').prop('disabled', false);
-                    $('#check-grammar-btn').html('Check Grammar');
-                }
-            });
-        });
-        
-        $('#translate-btn').click(function() {
-            const text = $('#translate-text').val().trim();
-            if (!text) return;
-            
-            const sourceLang = $('#source-lang').val();
-            const targetLang = $('#target-lang').val();
-            
-            $(this).prop('disabled', true);
-            $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Translating...');
-            
-            $.ajax({
-                url: '/api/translate',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ 
-                    text: text,
-                    source_lang: sourceLang,
-                    target_lang: targetLang
-                }),
-                success: function(data) {
-                    $('#translate-result').html(`
-                        <div class="alert alert-success">
-                            <h6>Translation:</h6>
-                            <p>${data.translated_text}</p>
-                        </div>
-                    `).show();
-                },
-                error: function(err) {
-                    $('#translate-result').html(`
-                        <div class="alert alert-danger">
-                            Error: ${err.responseJSON?.detail || 'Could not translate text'}
-                        </div>
-                    `).show();
-                },
-                complete: function() {
-                    $('#translate-btn').prop('disabled', false);
-                    $('#translate-btn').html('Translate');
-                }
-            });
-        });
-        
-        $('#summarize-btn').click(function() {
-            const text = $('#summarize-text').val().trim();
-            if (!text) return;
-            
-            $(this).prop('disabled', true);
-            $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Summarizing...');
-            
-            $.ajax({
-                url: '/api/summarize',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ text: text }),
-                success: function(data) {
-                    $('#summarize-result').html(`
-                        <div class="alert alert-info">
-                            <h6>Summary:</h6>
-                            <p>${data.summary}</p>
-                        </div>
-                    `).show();
-                },
-                error: function(err) {
-                    $('#summarize-result').html(`
-                        <div class="alert alert-danger">
-                            Error: ${err.responseJSON?.detail || 'Could not summarize text'}
-                        </div>
-                    `).show();
-                },
-                complete: function() {
-                    $('#summarize-btn').prop('disabled', false);
-                    $('#summarize-btn').html('Summarize');
-                }
-            });
         });
     });
 </script>
