@@ -3,9 +3,12 @@
  * Provides enhanced loading animations for all API requests
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Global loading spinner
-    const createLoadingSpinner = () => {
+// Create a namespace to avoid conflicts
+window.studywaiLoading = {
+    initialized: false,
+    
+    // Create a loading spinner element
+    createLoadingSpinner: function() {
         const spinner = document.createElement('div');
         spinner.classList.add('global-spinner');
         spinner.innerHTML = `
@@ -17,76 +20,91 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         return spinner;
-    };
-
-    // Add spinner to body when forms are submitted
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-        // Skip forms that have their own loading handling
-        if (form.classList.contains('skip-loading-handler')) return;
-        
-        form.addEventListener('submit', function(e) {
-            if (this.method === 'post' && !this.getAttribute('data-no-loading')) {
-                const spinner = createLoadingSpinner();
-                document.body.appendChild(spinner);
-                
-                // Auto-remove after 30 seconds to prevent indefinite loading
-                setTimeout(() => {
+    },
+    
+    // Handle form submissions
+    setupFormHandlers: function() {
+        const forms = document.querySelectorAll('form:not([data-loading-handled])');
+        forms.forEach(form => {
+            // Skip forms that have their own loading handling
+            if (form.classList.contains('skip-loading-handler')) return;
+            
+            // Mark this form as handled to prevent duplicate event listeners
+            form.setAttribute('data-loading-handled', 'true');
+            
+            form.addEventListener('submit', function(e) {
+                if (this.method === 'post' && !this.getAttribute('data-no-loading')) {
+                    const spinner = window.studywaiLoading.createLoadingSpinner();
+                    document.body.appendChild(spinner);
+                    
+                    // Auto-remove after 30 seconds to prevent indefinite loading
+                    setTimeout(() => {
+                        if (document.body.contains(spinner)) {
+                            document.body.removeChild(spinner);
+                        }
+                    }, 30000);
+                }
+            });
+        });
+    },
+    
+    // Handle button loading states
+    setupButtonHandlers: function() {
+        const actionButtons = document.querySelectorAll('.btn-action:not([data-loading-handled])');
+        actionButtons.forEach(button => {
+            button.setAttribute('data-loading-handled', 'true');
+            
+            button.addEventListener('click', function() {
+                if (this.getAttribute('data-loading-text')) {
+                    const originalHTML = this.innerHTML;
+                    const loadingText = this.getAttribute('data-loading-text');
+                    
+                    this.innerHTML = `
+                        <span class="spinner-border spinner-border-sm me-2" 
+                              role="status" aria-hidden="true"></span>
+                        ${loadingText}
+                    `;
+                    this.disabled = true;
+                    
+                    // Store original content for restoration
+                    this.setAttribute('data-original-html', originalHTML);
+                    
+                    // Auto-restore after 30 seconds to prevent indefinite loading
+                    setTimeout(() => {
+                        if (this.disabled && this.getAttribute('data-original-html')) {
+                            this.innerHTML = this.getAttribute('data-original-html');
+                            this.disabled = false;
+                        }
+                    }, 30000);
+                }
+            });
+        });
+    },
+    
+    // Create enhanced fetch function
+    setupFetchWithLoading: function() {
+        window.fetchWithLoading = (url, options = {}) => {
+            const spinner = window.studywaiLoading.createLoadingSpinner();
+            document.body.appendChild(spinner);
+            
+            return fetch(url, options)
+                .then(response => {
+                    document.body.removeChild(spinner);
+                    return response;
+                })
+                .catch(error => {
                     if (document.body.contains(spinner)) {
                         document.body.removeChild(spinner);
                     }
-                }, 30000);
-            }
-        });
-    });
-
-    // Button loading state
-    const actionButtons = document.querySelectorAll('.btn-action');
-    actionButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            if (this.getAttribute('data-loading-text')) {
-                const originalHTML = this.innerHTML;
-                const loadingText = this.getAttribute('data-loading-text');
-                
-                this.innerHTML = `
-                    <span class="spinner-border spinner-border-sm me-2" 
-                          role="status" aria-hidden="true"></span>
-                    ${loadingText}
-                `;
-                this.disabled = true;
-                
-                // Store original content for restoration
-                this.setAttribute('data-original-html', originalHTML);
-                
-                // Auto-restore after 30 seconds to prevent indefinite loading
-                setTimeout(() => {
-                    if (this.disabled && this.getAttribute('data-original-html')) {
-                        this.innerHTML = this.getAttribute('data-original-html');
-                        this.disabled = false;
-                    }
-                }, 30000);
-            }
-        });
-    });
-
-    // Enhanced fetch function with loading indicators
-    window.fetchWithLoading = (url, options = {}) => {
-        const spinner = createLoadingSpinner();
-        document.body.appendChild(spinner);
+                    throw error;
+                });
+        };
+    },
+    
+    // Add CSS for loading animations
+    addStyles: function() {
+        if (document.getElementById('loading-styles')) return;
         
-        return fetch(url, options)
-            .then(response => {
-                document.body.removeChild(spinner);
-                return response;
-            })
-            .catch(error => {
-                document.body.removeChild(spinner);
-                throw error;
-            });
-    };
-
-    // Add CSS if not already present
-    if (!document.getElementById('loading-styles')) {
         const style = document.createElement('style');
         style.id = 'loading-styles';
         style.textContent = `
@@ -162,5 +180,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         `;
         document.head.appendChild(style);
+    },
+    
+    // Initialize loading functionality
+    init: function() {
+        if (this.initialized) return;
+        console.log("Loading JS initializing");
+        
+        this.addStyles();
+        
+        // Setup immediately if DOM is ready, otherwise wait
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.setupFormHandlers();
+                this.setupButtonHandlers();
+                this.setupFetchWithLoading();
+                this.initialized = true;
+                console.log("Loading JS initialized");
+            });
+        } else {
+            this.setupFormHandlers();
+            this.setupButtonHandlers();
+            this.setupFetchWithLoading();
+            this.initialized = true;
+            console.log("Loading JS initialized (DOM already loaded)");
+        }
     }
-}); 
+};
+
+// Initialize loading functionality
+window.studywaiLoading.init(); 

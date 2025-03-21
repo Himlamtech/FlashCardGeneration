@@ -1,0 +1,128 @@
+/* 
+ * FORCED STYLES
+ * These styles override any other styles to ensure content visibility
+ */
+
+/* Critical visibility fix for the main content area */
+#content,
+#content.active,
+#content .container,
+#content .row,
+#content .card,
+#content .card-body {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: auto !important;
+    position: relative !important; 
+    z-index: 1 !important;
+}
+
+/* Ensure content has proper margins */
+#content {
+    margin-left: 280px !important;
+    width: calc(100% - 280px) !important;
+    transition: all 0.3s !important;
+}
+
+/* When sidebar is collapsed */
+#content.active {
+    margin-left: 80px !important;
+    width: calc(100% - 80px) !important;
+}
+
+/* Ensure form elements display properly */
+#content input,
+#content textarea,
+#content select,
+#content button {
+    display: inline-block !important;
+}
+
+/* For mobile view */
+@media (max-width: 768px) {
+    #content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    
+    #content.active {
+        margin-left: 80px !important;
+        width: calc(100% - 80px) !important;
+    }
+}
+
+/* Combat any animation trying to hide content */
+@keyframes forceVisible {
+    0%, 100% {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: block !important;
+    }
+}
+
+#content * {
+    animation: forceVisible 0.1s linear forwards !important;
+}
+
+/* Ensure confirmation dialogs appear correctly */
+.modal {
+    display: none;
+    z-index: 9999 !important;
+}
+
+.modal.show {
+    display: block !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.modal-dialog {
+    z-index: 10000 !important;
+    margin: 100px auto !important;
+    max-width: 500px !important;
+    width: calc(100% - 40px) !important;
+}
+
+.modal-content {
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+    position: relative !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid #eee !important;
+    padding: 15px 20px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.modal-body {
+    padding: 20px !important;
+}
+
+.modal-footer {
+    border-top: 1px solid #eee !important;
+    padding: 15px 20px !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+}
+
+/* Fix any backdrop issues */
+.modal-backdrop {
+    z-index: 9998 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.modal-backdrop.show {
+    opacity: 1 !important;
+}
+
+/* Fix delete confirmation dialog specific issues */
+#deleteConfirmDialog .modal-content {
+    z-index: 10001 !important;
+} 

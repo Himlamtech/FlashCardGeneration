@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnostic Test Page{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header">
+                <h2>Diagnostics Test Page</h2>
+            </div>
+            <div class="card-body">
+                <h3>Content Visibility Test</h3>
+                <p>If you can see this text, the content area is displaying correctly.</p>
+                
+                <div class="alert alert-success">
+                    The application is loading HTML content correctly.
+                </div>
+                
+                <h3>JavaScript Tests</h3>
+                <div id="js-namespace-tests">
+                    <p>Checking JavaScript namespaces...</p>
+                    <ul class="list-group mb-3">
+                        <li id="main-test" class="list-group-item">Main Script: <span class="badge bg-secondary">Checking...</span></li>
+                        <li id="loading-test" class="list-group-item">Loading Script: <span class="badge bg-secondary">Checking...</span></li>
+                        <li id="router-test" class="list-group-item">Router Script: <span class="badge bg-secondary">Checking...</span></li>
+                        <li id="animation-test" class="list-group-item">Animation Script: <span class="badge bg-secondary">Checking...</span></li>
+                    </ul>
+                </div>
+                
+                <div class="d-flex gap-2 mb-4">
+                    <button id="test-btn" class="btn btn-primary">Test Button Animation</button>
+                    <button id="test-loading-btn" class="btn btn-warning" data-loading-text="Processing...">Test Loading State</button>
+                </div>
+                
+                <h3>CSS Tests</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
+                                <h5>Card Test 1</h5>
+                                <p>This card should have hover effects</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-info-circle-fill text-primary fs-1 mb-3"></i>
+                                <h5>Card Test 2</h5>
+                                <p>This card should have hover effects</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-lightning-fill text-warning fs-1 mb-3"></i>
+                                <h5>Card Test 3</h5>
+                                <p>This card should have hover effects</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mainTest = document.getElementById('main-test');
+    const loadingTest = document.getElementById('loading-test');
+    const routerTest = document.getElementById('router-test');
+    const animationTest = document.getElementById('animation-test');
+    const testLoadingBtn = document.getElementById('test-loading-btn');
+    
+    // Check main script
+    if (window.studywaiMain && window.studywaiMain.initialized) {
+        mainTest.querySelector('.badge').textContent = 'Initialized ✓';
+        mainTest.querySelector('.badge').classList.replace('bg-secondary', 'bg-success');
+    } else {
+        mainTest.querySelector('.badge').textContent = 'Failed ✗';
+        mainTest.querySelector('.badge').classList.replace('bg-secondary', 'bg-danger');
+    }
+    
+    // Check loading script
+    if (window.studywaiLoading && window.studywaiLoading.initialized) {
+        loadingTest.querySelector('.badge').textContent = 'Initialized ✓';
+        loadingTest.querySelector('.badge').classList.replace('bg-secondary', 'bg-success');
+    } else {
+        loadingTest.querySelector('.badge').textContent = 'Failed ✗';
+        loadingTest.querySelector('.badge').classList.replace('bg-secondary', 'bg-danger');
+    }
+    
+    // Check router script
+    if (window.studywaiRouter) {
+        routerTest.querySelector('.badge').textContent = 'Initialized ✓';
+        routerTest.querySelector('.badge').classList.replace('bg-secondary', 'bg-success');
+    } else {
+        routerTest.querySelector('.badge').textContent = 'Failed ✗';
+        routerTest.querySelector('.badge').classList.replace('bg-secondary', 'bg-danger');
+    }
+    
+    // Check animation script
+    if (window.studywaiAnimation && window.studywaiAnimation.initialized) {
+        animationTest.querySelector('.badge').textContent = 'Initialized ✓';
+        animationTest.querySelector('.badge').classList.replace('bg-secondary', 'bg-success');
+    } else {
+        animationTest.querySelector('.badge').textContent = 'Failed ✗';
+        animationTest.querySelector('.badge').classList.replace('bg-secondary', 'bg-danger');
+    }
+    
+    // Set up loading button
+    if (testLoadingBtn) {
+        testLoadingBtn.addEventListener('click', function() {
+            const originalHTML = this.innerHTML;
+            const loadingText = this.getAttribute('data-loading-text');
+            
+            this.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" 
+                      role="status" aria-hidden="true"></span>
+                ${loadingText}
+            `;
+            this.disabled = true;
+            
+            // Restore after 2 seconds
+            setTimeout(() => {
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+            }, 2000);
+        });
+    }
+});
+</script>
+{% endblock %} 

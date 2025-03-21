@@ -119,11 +119,16 @@ body {
 
 /* Content Area Styling */
 #content {
-    width: calc(100% - var(--sidebar-width));
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
     min-height: 100vh;
-    transition: all var(--transition-speed) ease;
-    padding-bottom: 50px;
+    width: calc(100% - 280px);
+    margin-left: 280px;
+    transition: all 0.3s;
     position: relative;
+    z-index: 1;
+    background-color: #f0f5ff;
 }
 
 #content.active {
@@ -601,10 +606,12 @@ body {
     
     #content {
         width: 100%;
+        margin-left: 0;
     }
     
-    #content.active {
-        width: 100%;
+    #sidebar.active + #content {
+        margin-left: 280px;
+        width: calc(100% - 280px);
     }
     
     .chatbot-container {
@@ -1143,4 +1150,13 @@ body {
     font-weight: 600;
     font-size: 1.2rem;
     color: var(--primary-color);
+}
+
+/* Fix for container to ensure content displays properly */
+#content .container {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-height: 70vh;
+    padding: 20px;
 } 

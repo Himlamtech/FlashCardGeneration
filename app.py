@@ -141,19 +141,67 @@ async def edit_post(
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/delete/{flashcard_id}")
-async def delete(flashcard_id: int):
+async def delete(flashcard_id: int, request: Request):
     """Delete a flashcard"""
-    csv_db.delete_flashcard(flashcard_id)
-    return RedirectResponse(url="/", status_code=303)
+    try:
+        # Check if flashcard exists first
+        flashcard = csv_db.get_flashcard(flashcard_id)
+        if not flashcard:
+            # Return a JSON response for API clients or redirect with message for browser
+            if request.headers.get('content-type') == 'application/json':
+                return JSONResponse(
+                    content={"error": f"Flashcard with ID {flashcard_id} not found"},
+                    status_code=404
+                )
+            else:
+                return RedirectResponse(
+                    url=f"/?error=Flashcard+with+ID+{flashcard_id}+not+found", 
+                    status_code=303
+                )
+                
+        # Delete the flashcard
+        csv_db.delete_flashcard(flashcard_id)
+        
+        # Return appropriate response based on request type
+        if request.headers.get('content-type') == 'application/json':
+            return JSONResponse(
+                content={"success": True, "message": "Flashcard deleted successfully"}, 
+                status_code=200
+            )
+        else:
+            return RedirectResponse(
+                url="/?success=Flashcard+deleted+successfully", 
+                status_code=303
+            )
+    except Exception as e:
+        logger.error(f"Error deleting flashcard {flashcard_id}: {str(e)}")
+        
+        # Return appropriate error response based on request type
+        if request.headers.get('content-type') == 'application/json':
+            return JSONResponse(
+                content={"error": f"Failed to delete flashcard: {str(e)}"}, 
+                status_code=500
+            )
+        else:
+            return RedirectResponse(
+                url=f"/?error=Failed+to+delete+flashcard:+{str(e)}", 
+                status_code=303
+            )
 
 @app.get("/delete/{flashcard_id}")
-async def delete_get(flashcard_id: int):
+async def delete_get(flashcard_id: int, request: Request):
     """Handle GET requests to delete endpoint and redirect with error message"""
     # Return a redirect with an error message
-    return RedirectResponse(
-        url=f"/?error=Please+use+the+delete+button+on+the+card.+Direct+GET+requests+to+delete+are+not+allowed.",
-        status_code=303
-    )
+    if request.headers.get('accept') and 'text/html' in request.headers.get('accept'):
+        return RedirectResponse(
+            url=f"/?error=Please+use+the+delete+button+on+the+card.+Direct+GET+requests+to+delete+are+not+allowed.",
+            status_code=303
+        )
+    else:
+        return JSONResponse(
+            content={"error": "DELETE method required for this endpoint. GET is not supported."},
+            status_code=405
+        )
 
 @app.get("/study", response_class=HTMLResponse)
 async def study(request: Request):
@@ -200,6 +248,13 @@ async def healthcheck():
     """Simple health check endpoint"""
     return {"status": "healthy"}
 
+@app.get("/test-page", response_class=HTMLResponse)
+async def test_page(request: Request):
+    """Diagnostic test page for troubleshooting"""
+    context = get_common_context()
+    context["nav_info"]["current_path"] = "/test-page"
+    return templates.TemplateResponse("test-page.html", {"request": request, **context})
+
 @app.post("/api/summarize")
 async def api_summarize(request: Request):
     try:
@@ -219,6 +274,26 @@ async def api_summarize(request: Request):
 
 # Run the application
 if __name__ == "__main__":
+    # Add the catch-all route last, after all regular routes are defined
+    @app.get("/{path:path}")
+    async def catch_all(request: Request, path: str):
+        """Catch any invalid paths or URLs with hash fragments"""
+        # Check if path contains a hashtag or is not a valid route
+        if '#' in path or path.endswith('#') or path.endswith('/'):
+            # Extract the base path and redirect
+            base_path = path.split('#')[0].rstrip('/')
+            if not base_path:
+                return RedirectResponse(url="/", status_code=303)
+            return RedirectResponse(url=f"/{base_path}", status_code=303)
+        
+        # Try to render the page if it exists, otherwise redirect to home
+        try:
+            context = get_common_context()
+            return templates.TemplateResponse(f"{path}.html", {"request": request, **context})
+        except Exception as e:
+            logger.error(f"Error in catch_all route: {str(e)}")
+            return RedirectResponse(url="/", status_code=303)
+    
     import uvicorn
-    logger.info("Starting Flash Card Generation application")
+    logger.info("Starting StudyWAI application")
     uvicorn.run("app:app", host="0.0.0.0", port=5000, reload=True) 
