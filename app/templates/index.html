@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Flash Card Generation{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h1 class="card-title text-center mb-4">
+            <i class="fas fa-brain text-primary me-2"></i>AI Flash Card Generator
+        </h1>
+        <p class="lead text-center">Create and study flashcards with the help of AI</p>
+        <div class="d-flex justify-content-center gap-2">
+            <a href="/create" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus-circle me-2"></i>Create Flashcard
+            </a>
+            <a href="/study" class="btn btn-success btn-lg">
+                <i class="fas fa-book-reader me-2"></i>Study Now
+            </a>
+        </div>
+    </div>
+</div>
+
+<h2 class="mb-4">Your Flashcards ({{ flashcards|length }})</h2>
+
+{% if flashcards %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+    {% for flashcard in flashcards %}
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">{{ flashcard.word }}</h5>
+                <small>{{ flashcard.language }}</small>
+            </div>
+            <div class="card-body">
+                {% if flashcard.pronunciation %}
+                <p class="card-text"><strong>Pronunciation:</strong> <em>{{ flashcard.pronunciation }}</em></p>
+                {% endif %}
+                
+                {% if flashcard.translations %}
+                <p class="card-text"><strong>Translations:</strong> {{ flashcard.translations }}</p>
+                {% endif %}
+                
+                {% if flashcard.examples %}
+                <p class="card-text"><strong>Examples:</strong></p>
+                <ul class="list-group list-group-flush mb-3">
+                    {% for example in flashcard.examples.split(';') %}
+                    <li class="list-group-item">{{ example.strip() }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <small class="text-muted">Created: {{ flashcard.created_at }}</small>
+                <div>
+                    <a href="/edit/{{ flashcard.id }}" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ flashcard.id }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal{{ flashcard.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the flashcard for <strong>{{ flashcard.word }}</strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="/delete/{{ flashcard.id }}" method="post">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    <i class="fas fa-info-circle me-2"></i>You don't have any flashcards yet. 
+    <a href="/create" class="alert-link">Create your first flashcard</a>.
+</div>
+{% endif %}
+{% endblock %} 

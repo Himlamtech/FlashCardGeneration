@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block title %}Study Flashcards - Flash Card Generation{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-graduation-cap me-2 text-success"></i>Study Flashcards
+        </h1>
+        <p class="text-muted">Review and learn your flashcards using spaced repetition.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Flashcards
+        </a>
+    </div>
+</div>
+
+{% if flashcards|length == 0 %}
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-book fa-3x mb-3 text-muted"></i>
+            <h3 class="text-muted">No flashcards to study</h3>
+            <p>Create some flashcards first to start studying!</p>
+            <a href="{{ url_for('create') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Create Flashcard
+            </a>
+        </div>
+    </div>
+{% else %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-primary me-2" id="currentLanguage">English</span>
+                        <span class="badge bg-secondary" id="cardCounter">Card 1 of {{ flashcards|length }}</span>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="prevCard" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="nextCard">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Flashcard Front (Question) -->
+                    <div id="cardFront" class="text-center py-5">
+                        <h2 class="display-6 mb-3" id="cardWord"></h2>
+                        <p class="text-muted" id="cardPronunciation"></p>
+                        <button class="btn btn-success mt-4" id="showAnswer">
+                            <i class="fas fa-eye me-1"></i> Show Answer
+                        </button>
+                    </div>
+                    
+                    <!-- Flashcard Back (Answer) -->
+                    <div id="cardBack" class="text-center py-3" style="display: none;">
+                        <h3 class="mb-3">Translations:</h3>
+                        <p class="lead mb-4" id="cardTranslations"></p>
+                        
+                        <h3 class="mb-3">Examples:</h3>
+                        <ul class="list-group mb-4" id="cardExamples"></ul>
+                        
+                        <div class="d-flex justify-content-center gap-2 mt-4">
+                            <button class="btn btn-outline-danger" id="showNext">
+                                <i class="fas fa-times me-1"></i> Didn't Know
+                            </button>
+                            <button class="btn btn-outline-success" id="showNextGood">
+                                <i class="fas fa-check me-1"></i> Got It
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress mb-4">
+                <div class="progress-bar bg-success" id="studyProgress" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm bg-light mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Study Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Study Mode</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="studyMode" id="normalMode" value="normal" checked>
+                            <label class="form-check-label" for="normalMode">
+                                Normal (word to translation)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="studyMode" id="reverseMode" value="reverse">
+                            <label class="form-check-label" for="reverseMode">
+                                Reverse (translation to word)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Card Order</label>
+                        <select class="form-select" id="cardOrder">
+                            <option value="sequential" selected>Sequential</option>
+                            <option value="random">Random</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-success w-100" id="restartStudy">
+                        <i class="fas fa-sync-alt me-1"></i> Restart Study Session
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Study Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <h2 class="text-success mb-1" id="statsCorrect">0</h2>
+                            <p class="text-muted">Correct</p>
+                        </div>
+                        <div class="col-6">
+                            <h2 class="text-danger mb-1" id="statsIncorrect">0</h2>
+                            <p class="text-muted">Incorrect</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h3 class="text-primary mb-1" id="statsAccuracy">0%</h3>
+                        <p class="text-muted">Accuracy</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Store flashcards data from server
+        const flashcards = {{ flashcards|tojson }};
+        let currentCardIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        
+        // Study mode variables
+        let isReversed = false;
+        let isRandom = false;
+        let cardOrder = [...Array(flashcards.length).keys()]; // Creates [0,1,2,...] for indexes
+        
+        // Initialize the first card
+        if (flashcards.length > 0) {
+            showCard(currentCardIndex);
+            updateProgress();
+        }
+        
+        // Event listeners
+        $('#showAnswer').on('click', function() {
+            $('#cardFront').hide();
+            $('#cardBack').show();
+        });
+        
+        $('#showNext, #showNextGood').on('click', function() {
+            const isCorrect = $(this).attr('id') === 'showNextGood';
+            
+            if (isCorrect) {
+                correctCount++;
+            } else {
+                incorrectCount++;
+            }
+            
+            updateStats();
+            
+            if (currentCardIndex < flashcards.length - 1) {
+                currentCardIndex++;
+                showCard(currentCardIndex);
+                updateProgress();
+            } else {
+                // End of study session
+                showStudyComplete();
+            }
+            
+            // Reset card view to front
+            $('#cardBack').hide();
+            $('#cardFront').show();
+        });
+        
+        $('#prevCard').on('click', function() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                showCard(currentCardIndex);
+                updateProgress();
+                
+                // Reset card view to front
+                $('#cardBack').hide();
+                $('#cardFront').show();
+            }
+        });
+        
+        $('#nextCard').on('click', function() {
+            if (currentCardIndex < flashcards.length - 1) {
+                currentCardIndex++;
+                showCard(currentCardIndex);
+                updateProgress();
+                
+                // Reset card view to front
+                $('#cardBack').hide();
+                $('#cardFront').show();
+            }
+        });
+        
+        // Study mode controls
+        $('input[name="studyMode"]').on('change', function() {
+            isReversed = $(this).val() === 'reverse';
+            showCard(currentCardIndex);
+        });
+        
+        $('#cardOrder').on('change', function() {
+            isRandom = $(this).val() === 'random';
+            
+            if (isRandom) {
+                // Shuffle the card order
+                cardOrder = shuffleArray([...Array(flashcards.length).keys()]);
+            } else {
+                // Reset to sequential order
+                cardOrder = [...Array(flashcards.length).keys()];
+            }
+            
+            currentCardIndex = 0;
+            showCard(currentCardIndex);
+            updateProgress();
+            
+            // Reset card view to front
+            $('#cardBack').hide();
+            $('#cardFront').show();
+        });
+        
+        $('#restartStudy').on('click', function() {
+            // Reset study session
+            currentCardIndex = 0;
+            correctCount = 0;
+            incorrectCount = 0;
+            
+            if (isRandom) {
+                // Reshuffle if in random mode
+                cardOrder = shuffleArray([...Array(flashcards.length).keys()]);
+            }
+            
+            showCard(currentCardIndex);
+            updateProgress();
+            updateStats();
+            
+            // Reset card view to front
+            $('#cardBack').hide();
+            $('#cardFront').show();
+        });
+        
+        // Functions
+        function showCard(index) {
+            const cardIndex = cardOrder[index];
+            const card = flashcards[cardIndex];
+            
+            // Update card counter and nav buttons
+            $('#cardCounter').text(`Card ${index + 1} of ${flashcards.length}`);
+            $('#prevCard').prop('disabled', index === 0);
+            $('#nextCard').prop('disabled', index === flashcards.length - 1);
+            
+            // Update language badge
+            $('#currentLanguage').text(card.language.charAt(0).toUpperCase() + card.language.slice(1));
+            
+            if (!isReversed) {
+                // Normal mode (word to translation)
+                $('#cardWord').text(card.word);
+                $('#cardPronunciation').text(card.pronunciation);
+                $('#cardTranslations').text(card.translations);
+            } else {
+                // Reverse mode (translation to word)
+                $('#cardWord').text(card.translations.split(',')[0].trim());
+                $('#cardPronunciation').text('');
+                $('#cardTranslations').text(card.word);
+            }
+            
+            // Update examples
+            const examples = card.examples.split(';');
+            const examplesList = $('#cardExamples');
+            examplesList.empty();
+            
+            examples.forEach(function(example) {
+                if (example.trim()) {
+                    examplesList.append(`<li class="list-group-item">${example.trim()}</li>`);
+                }
+            });
+        }
+        
+        function updateProgress() {
+            const progress = ((currentCardIndex + 1) / flashcards.length) * 100;
+            $('#studyProgress').css('width', `${progress}%`);
+        }
+        
+        function updateStats() {
+            const total = correctCount + incorrectCount;
+            const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+            
+            $('#statsCorrect').text(correctCount);
+            $('#statsIncorrect').text(incorrectCount);
+            $('#statsAccuracy').text(`${accuracy}%`);
+        }
+        
+        function showStudyComplete() {
+            const accuracy = correctCount + incorrectCount > 0 
+                ? Math.round((correctCount / (correctCount + incorrectCount)) * 100) 
+                : 0;
+                
+            // Create a completion message
+            const cardBody = `
+                <div class="text-center py-5">
+                    <i class="fas fa-trophy fa-4x mb-4 text-warning"></i>
+                    <h2 class="mb-3">Study Session Complete!</h2>
+                    <p class="lead mb-2">You completed all ${flashcards.length} flashcards.</p>
+                    <div class="row mt-4 mb-4">
+                        <div class="col-6 border-end">
+                            <h3 class="text-success">${correctCount}</h3>
+                            <p>Correct</p>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="text-danger">${incorrectCount}</h3>
+                            <p>Incorrect</p>
+                        </div>
+                    </div>
+                    <h4>Accuracy: <span class="text-primary">${accuracy}%</span></h4>
+                    <button class="btn btn-success mt-4" id="restartFromComplete">
+                        <i class="fas fa-sync-alt me-1"></i> Start Again
+                    </button>
+                </div>
+            `;
+            
+            // Replace card content
+            $('#cardFront, #cardBack').hide();
+            $('.card-body').first().append(cardBody);
+            
+            // Add restart event handler
+            $('#restartFromComplete').on('click', function() {
+                $(this).parent().remove();
+                
+                // Reset session
+                currentCardIndex = 0;
+                correctCount = 0;
+                incorrectCount = 0;
+                
+                if (isRandom) {
+                    // Reshuffle if in random mode
+                    cardOrder = shuffleArray([...Array(flashcards.length).keys()]);
+                }
+                
+                showCard(currentCardIndex);
+                updateProgress();
+                updateStats();
+                
+                // Show card front
+                $('#cardFront').show();
+            });
+        }
+        
+        // Fisher-Yates shuffle algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    });
+</script>
+{% endblock %} 

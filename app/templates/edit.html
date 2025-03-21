@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Flashcard - Flash Card Generation{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Flashcard</h3>
+            </div>
+            <div class="card-body">
+                <form action="/edit/{{ flashcard.id }}" method="post">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="word" class="form-label">Word or Phrase</label>
+                            <input type="text" class="form-control" id="word" name="word" 
+                                value="{{ flashcard.word }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="language" class="form-label">Language</label>
+                            <select class="form-select" id="language" name="language">
+                                <option value="english" {% if flashcard.language == 'english' %}selected{% endif %}>English</option>
+                                <option value="vietnamese" {% if flashcard.language == 'vietnamese' %}selected{% endif %}>Vietnamese</option>
+                                <option value="spanish" {% if flashcard.language == 'spanish' %}selected{% endif %}>Spanish</option>
+                                <option value="french" {% if flashcard.language == 'french' %}selected{% endif %}>French</option>
+                                <option value="german" {% if flashcard.language == 'german' %}selected{% endif %}>German</option>
+                                <option value="japanese" {% if flashcard.language == 'japanese' %}selected{% endif %}>Japanese</option>
+                                <option value="korean" {% if flashcard.language == 'korean' %}selected{% endif %}>Korean</option>
+                                <option value="chinese" {% if flashcard.language == 'chinese' %}selected{% endif %}>Chinese</option>
+                                <option value="russian" {% if flashcard.language == 'russian' %}selected{% endif %}>Russian</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="translations" class="form-label">Translations</label>
+                        <textarea class="form-control" id="translations" name="translations" rows="2">{{ flashcard.translations }}</textarea>
+                        <div class="form-text">Comma-separated list of translations</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="pronunciation" class="form-label">Pronunciation</label>
+                        <input type="text" class="form-control" id="pronunciation" name="pronunciation" 
+                            value="{{ flashcard.pronunciation }}">
+                        <div class="form-text">Phonetic pronunciation or guide</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="examples" class="form-label">Examples</label>
+                        <textarea class="form-control" id="examples" name="examples" rows="4">{{ flashcard.examples }}</textarea>
+                        <div class="form-text">Example sentences separated by semicolons (;)</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="/" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
