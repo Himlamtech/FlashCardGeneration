@@ -3,384 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Flash Card Generation using AI{% endblock %}</title>
-    
+    <title>{% block title %}StudyWAI - Study With AI{% endblock %}</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="{{ url_for('static', path='/js/script.js') }}" defer></script>
+    <script>
+        // Setup markdown rendering
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.markdown-content').forEach(function(element) {
+                element.innerHTML = marked.parse(element.textContent);
+            });
+        });
+    </script>
+    {% block extra_css %}{% endblock %}
     <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #34d399;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --accent-color: #f59e0b;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+        }
+        
         body {
-            min-height: 100vh;
+            background-color: #f0f5ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .wrapper {
             display: flex;
-            flex-direction: column;
+            width: 100%;
         }
         
         .sidebar {
-            min-width: 250px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            height: 100%;
+            width: 280px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--dark-color), #364659);
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.1);
             position: fixed;
-            left: 0;
-            top: 0;
-            padding-top: 20px;
             z-index: 1000;
         }
         
-        .sidebar .logo {
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #dee2e6;
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .sidebar .nav-link {
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        .sidebar-header p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .sidebar .components {
+            padding: 10px 0;
+        }
+        
+        .sidebar ul li a {
             padding: 12px 20px;
-            color: #495057;
-            border-radius: 0;
-            margin: 2px 0;
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+            border-left: 4px solid transparent;
         }
         
-        .sidebar .nav-link:hover {
-            background-color: #e9ecef;
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: var(--secondary-color);
         }
         
-        .sidebar .nav-link.active {
-            background-color: #0d6efd;
+        .sidebar ul li.active > a {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: var(--secondary-color);
+        }
+        
+        .sidebar ul li i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar .nav-item-header {
+            padding: 10px 20px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-footer a:hover {
             color: white;
         }
         
-        .sidebar .category {
-            font-size: 0.8em;
-            text-transform: uppercase;
-            color: #6c757d;
-            font-weight: bold;
-            padding: 15px 20px 5px;
-        }
-        
-        .content-wrapper {
-            margin-left: 250px;
-            width: calc(100% - 250px);
+        #content {
+            width: calc(100% - 280px);
+            margin-left: 280px;
+            transition: all 0.3s;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
         
-        .main-content {
-            flex: 1;
-            padding: 20px;
+        #sidebarCollapse {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
         
-        footer {
-            margin-top: auto;
+        .navbar {
+            background: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #eee;
         }
         
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-            .content-wrapper {
-                margin-left: 0;
-                width: 100%;
-            }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: none;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            border-bottom: none;
+            background: var(--primary-color) !important;
+            color: white !important;
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-success {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fade-in-element {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .flashcard-submenu {
+            margin-left: 20px;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .flashcard-submenu.show {
+            max-height: 300px;
+        }
+        
+        .flashcard-toggle {
+            cursor: pointer;
+        }
+        
+        .flashcard-toggle i.submenu-icon {
+            transition: transform 0.3s;
+            float: right;
+        }
+        
+        .flashcard-toggle.collapsed i.submenu-icon {
+            transform: rotate(-90deg);
         }
     </style>
-    
-    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <div class="logo">
-            <a class="text-decoration-none" href="/">
-                <i class="fas fa-brain me-2 text-primary"></i>
-                <span class="fw-bold fs-4">AI Flash Cards</span>
-            </a>
-        </div>
-        
-        <div class="category">Main</div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link {% if nav_info.current_path == '/' %}active{% endif %}" href="/">
-                    <i class="fas fa-home me-2"></i> Home
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if nav_info.current_path == '/study' %}active{% endif %}" href="/study">
-                    <i class="fas fa-book-reader me-2"></i> Study
-                </a>
-            </li>
-        </ul>
-        
-        <div class="category">Create & Manage</div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link {% if nav_info.current_path == '/create' %}active{% endif %}" href="/create">
-                    <i class="fas fa-plus-circle me-2"></i> Create Flashcard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="return false;">
-                    <i class="fas fa-folder me-2"></i> My Sets
-                </a>
-            </li>
-        </ul>
-        
-        <div class="category">AI Tools</div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="#grammarModal" data-bs-toggle="modal">
-                    <i class="fas fa-spell-check me-2"></i> Grammar Check
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#translateModal" data-bs-toggle="modal">
-                    <i class="fas fa-language me-2"></i> Translate
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#summarizeModal" data-bs-toggle="modal">
-                    <i class="fas fa-compress-alt me-2"></i> Summarize
-                </a>
-            </li>
-        </ul>
-        
-        <div class="category">Settings</div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="return false;">
-                    <i class="fas fa-cog me-2"></i> Preferences
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="return false;">
-                    <i class="fas fa-question-circle me-2"></i> Help
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Content Wrapper -->
-    <div class="content-wrapper">
-        <!-- Main Content -->
-        <div class="main-content">
-            {% if error %}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ error }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>StudyWAI</h3>
+                <p class="text-light">Study With AI</p>
             </div>
-            {% endif %}
-            
-            {% block content %}{% endblock %}
-        </div>
 
-        <!-- Footer -->
-        <footer class="footer py-3 bg-light">
-            <div class="container text-center">
-                <span class="text-muted">
-                    &copy; {{ now.year }} AI Flash Card Generator | 
-                    <a href="https://github.com/username/flashcard-generator" target="_blank" class="text-decoration-none">
-                        <i class="fab fa-github me-1"></i>GitHub
+            <ul class="list-unstyled components">
+                <!-- Flashcard Section (Collapsible) -->
+                <li>
+                    <a href="#flashcardSubmenu" class="flashcard-toggle" data-bs-toggle="collapse" aria-expanded="{% if request.url.path in ['/', '/create', '/study'] %}true{% else %}false{% endif %}">
+                        <i class="bi bi-stack"></i> Flashcards
+                        <i class="bi bi-chevron-down submenu-icon ms-auto"></i>
                     </a>
-                </span>
-            </div>
-        </footer>
-    </div>
+                    <div class="collapse {% if request.url.path in ['/', '/create', '/study'] %}show{% endif %}" id="flashcardSubmenu">
+                        <ul class="list-unstyled flashcard-submenu">
+                            <li class="{% if request.url.path == '/create' %}active{% endif %}">
+                                <a href="/create" class="nav-link">
+                                    <i class="bi bi-plus-square"></i> Create Cards
+                                </a>
+                            </li>
+                            <li class="{% if request.url.path == '/' %}active{% endif %}">
+                                <a href="/" class="nav-link">
+                                    <i class="bi bi-collection"></i> My Flashcards
+                                </a>
+                            </li>
+                            <li class="{% if request.url.path == '/study' %}active{% endif %}">
+                                <a href="/study" class="nav-link">
+                                    <i class="bi bi-book"></i> Study
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <!-- AI Tools Section -->
+                <li class="{% if request.url.path == '/chatbot' %}active{% endif %}">
+                    <a href="/chatbot" class="nav-link">
+                        <i class="bi bi-robot"></i> AI Assistant
+                    </a>
+                </li>
+                <li class="{% if request.url.path == '/translate' %}active{% endif %}">
+                    <a href="/translate" class="nav-link">
+                        <i class="bi bi-translate"></i> Translation
+                    </a>
+                </li>
+                <li class="{% if request.url.path == '/grammar' %}active{% endif %}">
+                    <a href="/grammar" class="nav-link">
+                        <i class="bi bi-check-square"></i> Grammar Checking
+                    </a>
+                </li>
+                <li class="{% if request.url.path == '/summarize' %}active{% endif %}">
+                    <a href="/summarize" class="nav-link">
+                        <i class="bi bi-file-text"></i> Summarize
+                    </a>
+                </li>
+            </ul>
 
-    <!-- Modal for Grammar Check -->
-    <div class="modal fade" id="grammarModal" tabindex="-1" aria-labelledby="grammarModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="grammarModalLabel">Grammar Check</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="grammarForm">
-                        <div class="mb-3">
-                            <label for="grammarText" class="form-label">Enter text to check</label>
-                            <textarea class="form-control" id="grammarText" rows="5" required></textarea>
-                        </div>
-                        <div id="grammarResult" class="d-none">
-                            <h6>Result:</h6>
-                            <div class="alert alert-success" id="grammarOutput"></div>
-                            <h6>Errors found:</h6>
-                            <ul id="grammarErrors" class="list-group"></ul>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="checkGrammarBtn">Check Grammar</button>
-                </div>
+            <div class="sidebar-footer">
+                <a href="https://github.com/yourusername/flashcard-app" target="_blank" class="footer-link">
+                    <i class="bi bi-github"></i> GitHub
+                </a>
+                <span>&copy; 2023 StudyWAI</span>
             </div>
-        </div>
-    </div>
+        </nav>
 
-    <!-- Modal for Translation -->
-    <div class="modal fade" id="translateModal" tabindex="-1" aria-labelledby="translateModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="translateModalLabel">Translate Text</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Page Content -->
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <span class="navbar-brand ms-3 d-none d-md-inline">
+                        <i class="bi bi-mortarboard-fill text-primary"></i> StudyWAI
+                    </span>
                 </div>
-                <div class="modal-body">
-                    <form id="translateForm">
-                        <div class="mb-3">
-                            <label for="translateText" class="form-label">Enter text to translate</label>
-                            <textarea class="form-control" id="translateText" rows="3" required></textarea>
+            </nav>
+            
+            <div class="container mt-4">
+                {% if messages %}
+                    <div class="row">
+                        <div class="col-12">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label for="sourceLang" class="form-label">Source Language</label>
-                                <select class="form-select" id="sourceLang">
-                                    <option value="english">English</option>
-                                    <option value="spanish">Spanish</option>
-                                    <option value="french">French</option>
-                                    <option value="german">German</option>
-                                    <option value="italian">Italian</option>
-                                </select>
-                            </div>
-                            <div class="col">
-                                <label for="targetLang" class="form-label">Target Language</label>
-                                <select class="form-select" id="targetLang">
-                                    <option value="french">French</option>
-                                    <option value="spanish">Spanish</option>
-                                    <option value="english">English</option>
-                                    <option value="german">German</option>
-                                    <option value="italian">Italian</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div id="translateResult" class="d-none">
-                            <h6>Translation:</h6>
-                            <div class="alert alert-success" id="translationOutput"></div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="translateBtn">Translate</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for Summarization -->
-    <div class="modal fade" id="summarizeModal" tabindex="-1" aria-labelledby="summarizeModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="summarizeModalLabel">Summarize Text</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="summarizeForm">
-                        <div class="mb-3">
-                            <label for="summarizeText" class="form-label">Enter text to summarize</label>
-                            <textarea class="form-control" id="summarizeText" rows="5" required></textarea>
-                        </div>
-                        <div id="summarizeResult" class="d-none">
-                            <h6>Summary:</h6>
-                            <div class="alert alert-success" id="summaryOutput"></div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="summarizeBtn">Summarize</button>
-                </div>
+                    </div>
+                {% endif %}
+                
+                {% block content %}{% endblock %}
             </div>
         </div>
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     <!-- Custom JS -->
-    <script src="{{ url_for('static', path='/js/scripts.js') }}"></script>
-    
     <script>
-        $(document).ready(function() {
-            // Grammar Check
-            $('#checkGrammarBtn').click(function() {
-                const text = $('#grammarText').val();
-                if (text) {
-                    $.ajax({
-                        url: '/api/check-grammar',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ text: text }),
-                        success: function(response) {
-                            $('#grammarOutput').text(response.corrected_text);
-                            $('#grammarErrors').empty();
-                            if (response.errors.length > 0) {
-                                response.errors.forEach(error => {
-                                    $('#grammarErrors').append(`<li class="list-group-item">${error}</li>`);
-                                });
-                            } else {
-                                $('#grammarErrors').append(`<li class="list-group-item">No errors found</li>`);
-                            }
-                            $('#grammarResult').removeClass('d-none');
-                        }
-                    });
-                }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Toggle sidebar
+            document.getElementById('sidebarCollapse').addEventListener('click', function () {
+                document.getElementById('sidebar').classList.toggle('active');
+                document.getElementById('content').classList.toggle('active');
             });
             
-            // Translation
-            $('#translateBtn').click(function() {
-                const text = $('#translateText').val();
-                const sourceLang = $('#sourceLang').val();
-                const targetLang = $('#targetLang').val();
+            // Add animation class to cards when they appear in viewport
+            const cards = document.querySelectorAll('.card');
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('fade-in-element');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
                 
-                if (text) {
-                    $.ajax({
-                        url: '/api/translate',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ 
-                            text: text,
-                            source_lang: sourceLang,
-                            target_lang: targetLang
-                        }),
-                        success: function(response) {
-                            $('#translationOutput').text(response.translated_text);
-                            $('#translateResult').removeClass('d-none');
-                        }
-                    });
-                }
-            });
-            
-            // Summarization
-            $('#summarizeBtn').click(function() {
-                const text = $('#summarizeText').val();
-                if (text) {
-                    $.ajax({
-                        url: '/api/summarize',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ text: text }),
-                        success: function(response) {
-                            $('#summaryOutput').text(response.summary);
-                            $('#summarizeResult').removeClass('d-none');
-                        }
-                    });
-                }
-            });
+                cards.forEach(card => {
+                    observer.observe(card);
+                });
+            } else {
+                // Fallback for browsers without IntersectionObserver
+                cards.forEach(card => {
+                    card.classList.add('fade-in-element');
+                });
+            }
         });
     </script>
-    
+    <!-- Chatbot Widget JS (only on non-chatbot pages) -->
+    {% if request.url.path != '/chatbot' %}
+    <script src="{{ url_for('static', path='/js/chatbot.js') }}"></script>
+    {% endif %}
+    <!-- Animation JS -->
+    <script src="{{ url_for('static', path='/js/animation.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

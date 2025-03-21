@@ -174,12 +174,34 @@ async def translate(text, source_lang, target_lang):
         
     return data
 
-async def summarize(text):
+async def summarize(text, length=None, style=None):
     """
     Summarize text using Gemini AI
+    
+    Args:
+        text (str): The text to summarize
+        length (str): "short", "medium", or "long"
+        style (str): "informative", "academic", or "simplified"
     """
+    # Define length parameters
+    length_desc = {
+        "short": "a very concise summary (1-2 sentences)",
+        "medium": "a moderate length summary (3-5 sentences)",
+        "long": "a comprehensive summary (multiple paragraphs)"
+    }
+    
+    # Define style parameters
+    style_desc = {
+        "informative": "factual and informative",
+        "academic": "formal academic style",
+        "simplified": "simplified language for easier understanding"
+    }
+    
+    length_param = length_desc.get(length, length_desc["medium"]) if length else length_desc["medium"]
+    style_param = style_desc.get(style, style_desc["informative"]) if style else style_desc["informative"]
+    
     prompt = f"""
-    Summarize the following text:
+    Summarize the following text into {length_param} using a {style_param} style:
     
     "{text}"
     

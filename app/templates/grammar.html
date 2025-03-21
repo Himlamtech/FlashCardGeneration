@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Grammar Check - FlashCard Generation{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4 fade-in-element">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="bi bi-check-square me-2"></i>Grammar Check</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Improve your writing with our AI-powered grammar checker. Enter your text below to check for grammar, spelling, and style issues.</p>
+                    
+                    <form id="grammarForm" class="mt-4">
+                        <div class="mb-3">
+                            <label for="grammarText" class="form-label">Enter text to check:</label>
+                            <textarea id="grammarText" class="form-control" rows="6" placeholder="Enter your text here..."></textarea>
+                            <div class="form-text">Our grammar checker will identify and correct spelling errors, grammar mistakes, and suggest style improvements.</div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                <i class="bi bi-check-circle me-1"></i> Check Grammar
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="grammarResult" class="mt-4 d-none">
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill me-2"></i>Grammar check completed successfully!
+                        </div>
+                        <div class="card border-success">
+                            <div class="card-header bg-success bg-opacity-10">
+                                <h5 class="mb-0 text-success"><i class="bi bi-pencil me-2"></i>Corrected Text</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="grammarCorrected" class="p-3 bg-light rounded"></div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                            <button type="button" class="btn btn-outline-primary" onclick="copyToClipboard('grammarCorrected')">
+                                <i class="bi bi-clipboard me-1"></i> Copy to Clipboard
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="createFlashcardFromText('grammarCorrected')">
+                                <i class="bi bi-plus-circle me-1"></i> Create Flashcard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle grammar check form submission
+        const grammarForm = document.getElementById('grammarForm');
+        if (grammarForm) {
+            grammarForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const text = document.getElementById('grammarText').value;
+                if (!text) {
+                    alert('Please enter some text to check.');
+                    return;
+                }
+                
+                const spinner = this.querySelector('.spinner-border');
+                const submitBtn = this.querySelector('button[type="submit"]');
+                
+                spinner.classList.remove('d-none');
+                submitBtn.disabled = true;
+                
+                fetch('/api/check-grammar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('grammarCorrected').textContent = data.corrected_text;
+                    document.getElementById('grammarResult').classList.remove('d-none');
+                    document.getElementById('grammarResult').scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                })
+                .finally(() => {
+                    spinner.classList.add('d-none');
+                    submitBtn.disabled = false;
+                });
+            });
+        }
+    });
+    
+    // Copy text to clipboard
+    function copyToClipboard(elementId) {
+        const text = document.getElementById(elementId).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            // Show toast or some notification
+            alert('Text copied to clipboard!');
+        });
+    }
+    
+    // Create flashcard from corrected text
+    function createFlashcardFromText(elementId) {
+        const text = document.getElementById(elementId).textContent;
+        window.location.href = `/create?answer=${encodeURIComponent(text)}`;
+    }
+</script>
+{% endblock %} 

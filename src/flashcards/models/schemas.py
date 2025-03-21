@@ -8,8 +8,14 @@ class TextRequest(BaseModel):
 class TranslationRequest(BaseModel):
     """Request model for translation operations"""
     text: str
-    source_lang: str = "english"
-    target_lang: str = "vietnamese"
+    source_lang: Optional[str] = None
+    target_lang: Optional[str] = None
+
+class SummarizeRequest(BaseModel):
+    """Request model for summarization with additional parameters"""
+    text: str
+    length: Optional[str] = None  # short, medium, long
+    style: Optional[str] = None   # informative, academic, simplified
 
 class FlashcardCreate(BaseModel):
     """Model for flashcard creation"""
