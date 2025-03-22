@@ -1,128 +1,434 @@
-/* 
- * FORCED STYLES
- * These styles override any other styles to ensure content visibility
+/* Force consistent styling across browsers */
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-500);
+}
+
+/* Better form controls */
+input, textarea, select, button {
+  font-family: var(--font-primary);
+}
+
+/* Focus styles */
+a:focus, button:focus, input:focus, textarea:focus, select:focus, .form-control:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(62, 104, 255, 0.2);
+}
+
+/* Reset button styling */
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+/* Flash messages */
+.flash-message {
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  animation: flashIn 0.3s ease forwards;
+  position: relative;
+}
+
+.flash-success {
+  background-color: rgba(0, 184, 121, 0.1);
+  color: var(--success-color);
+  border-left: 4px solid var(--success-color);
+}
+
+.flash-error {
+  background-color: rgba(255, 92, 92, 0.1);
+  color: var(--danger-color);
+  border-left: 4px solid var(--danger-color);
+}
+
+.flash-info {
+  background-color: rgba(62, 104, 255, 0.1);
+  color: var(--primary-color);
+  border-left: 4px solid var(--primary-color);
+}
+
+.flash-warning {
+  background-color: rgba(255, 184, 0, 0.1);
+  color: var(--warning-color);
+  border-left: 4px solid var(--warning-color);
+}
+
+.flash-message .close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  opacity: 0.5;
+  transition: var(--transition);
+}
+
+.flash-message .close:hover {
+  opacity: 1;
+}
+
+@keyframes flashIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Page transitions */
+.page-transition {
+  animation: pageIn 0.5s ease forwards;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Glass effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Mobile navigation */
+.mobile-nav-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  z-index: 1100;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--box-shadow);
+}
+
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    display: flex;
+  }
+}
+
+/* Prevent text selection on interactive elements */
+.btn, .nav-link, .card-header, .tool-card {
+  user-select: none;
+}
+
+/* Better focus indication for keyboard navigation */
+.keyboard-focus:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/**
+ * Critical CSS fixes for StudyWAI application
+ * These styles override the base styles to fix display issues
  */
 
-/* Critical visibility fix for the main content area */
-#content,
-#content.active,
-#content .container,
-#content .row,
-#content .card,
-#content .card-body {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    min-height: auto !important;
-    position: relative !important; 
-    z-index: 1 !important;
+/* Fix sidebar issues */
+.app-sidebar {
+  min-height: 100vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Ensure content has proper margins */
-#content {
-    margin-left: 280px !important;
-    width: calc(100% - 280px) !important;
-    transition: all 0.3s !important;
+.sidebar-nav {
+  flex-grow: 1;
 }
 
-/* When sidebar is collapsed */
-#content.active {
-    margin-left: 80px !important;
-    width: calc(100% - 80px) !important;
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Ensure form elements display properly */
-#content input,
-#content textarea,
-#content select,
-#content button {
-    display: inline-block !important;
+/* Fix flashcard critical display issues */
+.flashcard {
+  perspective: 1000px;
+  width: 100%;
+  height: 220px;
+  margin-bottom: 1rem;
+  cursor: pointer;
 }
 
-/* For mobile view */
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.flashcard-front {
+  background: linear-gradient(135deg, #ebefff, #3e68ff);
+  color: white;
+}
+
+.flashcard-back {
+  background-color: white;
+  color: #1a2036;
+  transform: rotateY(180deg);
+  text-align: left;
+  overflow-y: auto;
+}
+
+.word {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.language {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.translations, .examples {
+  margin-bottom: 1rem;
+}
+
+.translations-title, .examples-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #3e68ff;
+}
+
+.example {
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid #e9ecef;
+}
+
+.flashcard-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+/* Fix content layout */
+.content-header {
+  padding: 2rem 2rem 0.5rem;
+}
+
+.content-wrapper {
+  padding: 1.5rem 2rem;
+  min-height: calc(100vh - 180px);
+}
+
+.footer {
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Fix tool cards */
+.tool-card {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  height: 100%;
+}
+
+.tool-card .icon {
+  background-color: rgba(62, 104, 255, 0.1);
+  color: #3e68ff;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border-radius: 1rem;
+  margin: 0 auto;
+}
+
+.tool-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Make fade animations work */
+.fade-in-element {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-in-element.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease-in, transform 0.3s ease-out;
+}
+
+/* Flash message styling */
+.flash-message {
+  position: relative;
+  padding-right: 2.5rem;
+}
+
+.flash-message .close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.flash-message .close:hover {
+  opacity: 1;
+}
+
+/* Fix mobile styles */
 @media (max-width: 768px) {
-    #content {
-        margin-left: 0 !important;
-        width: 100% !important;
-    }
-    
-    #content.active {
-        margin-left: 80px !important;
-        width: calc(100% - 80px) !important;
-    }
+  .app-sidebar {
+    left: -260px;
+    transition: all 0.3s ease-in-out;
+    z-index: 1030;
+  }
+  
+  .app-sidebar.show {
+    left: 0;
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .content-header,
+  .content-wrapper {
+    padding: 1rem;
+  }
 }
 
-/* Combat any animation trying to hide content */
-@keyframes forceVisible {
-    0%, 100% {
-        opacity: 1 !important;
-        visibility: visible !important;
-        display: block !important;
-    }
+/* Fix dark mode */
+[data-theme="dark"] {
+  --primary-light: #2a3353;
+  --gray-100: #1a2036;
+  --gray-900: #f8f9fc;
+  color-scheme: dark;
 }
 
-#content * {
-    animation: forceVisible 0.1s linear forwards !important;
+[data-theme="dark"] body {
+  background-color: #1a2036;
+  color: #f8f9fc;
 }
 
-/* Ensure confirmation dialogs appear correctly */
-.modal {
-    display: none;
-    z-index: 9999 !important;
+[data-theme="dark"] .card,
+[data-theme="dark"] .flashcard-back,
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .input-group-text {
+  background-color: #2a3353;
+  color: #f8f9fc;
 }
 
-.modal.show {
-    display: block !important;
-    background-color: rgba(0, 0, 0, 0.5) !important;
+[data-theme="dark"] .card-header {
+  background-color: #2a3353;
+  border-bottom-color: #3a426a;
 }
 
-.modal-dialog {
-    z-index: 10000 !important;
-    margin: 100px auto !important;
-    max-width: 500px !important;
-    width: calc(100% - 40px) !important;
+[data-theme="dark"] .form-control {
+  border-color: #3a426a;
 }
 
-.modal-content {
-    background: white !important;
-    border-radius: 8px !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
-    position: relative !important;
-    padding: 0 !important;
-    border: none !important;
+[data-theme="dark"] .form-control:focus {
+  border-color: #3e68ff;
+  background-color: #2a3353;
 }
 
-.modal-header {
-    border-bottom: 1px solid #eee !important;
-    padding: 15px 20px !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
+[data-theme="dark"] .text-muted {
+  color: #adb5bd !important;
 }
 
-.modal-body {
-    padding: 20px !important;
+[data-theme="dark"] .footer {
+  background-color: #1a2036;
 }
 
-.modal-footer {
-    border-top: 1px solid #eee !important;
-    padding: 15px 20px !important;
-    display: flex !important;
-    justify-content: flex-end !important;
-    gap: 10px !important;
+/* Fix loading spinner */
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease-in-out;
 }
 
-/* Fix any backdrop issues */
-.modal-backdrop {
-    z-index: 9998 !important;
-    background-color: rgba(0, 0, 0, 0.5) !important;
+[data-theme="dark"] .loading-container {
+  background-color: rgba(26, 32, 54, 0.9);
 }
 
-.modal-backdrop.show {
-    opacity: 1 !important;
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3e68ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-/* Fix delete confirmation dialog specific issues */
-#deleteConfirmDialog .modal-content {
-    z-index: 10001 !important;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 } 

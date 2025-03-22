@@ -1,194 +1,220 @@
 {% extends "base.html" %}
 
-{% block title %}My Flashcards - StudyWAI{% endblock %}
+{% block title %}StudyWAI - Your AI Study Assistant{% endblock %}
+
+{% block page_title %}Your Flashcards{% endblock %}
+{% block page_subtitle %}Study, review and master your flashcards with AI-powered assistance.{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="display-5 mb-0">
-                    <i class="bi bi-collection text-primary me-2"></i> My Flashcards
-                </h1>
-                <div>
-                    <a href="{{ url_for('create_get') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-lg"></i> Create New
-                    </a>
-                    <a href="{{ url_for('study') }}" class="btn btn-success ms-2">
-                        <i class="bi bi-book"></i> Study
-                    </a>
-                </div>
+<!-- Background Canvas for Particle Effect -->
+<canvas id="particles-canvas" class="particles-background"></canvas>
+
+<!-- Stats Summary -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card hover-card">
+            <div class="card-body text-center">
+                <div class="display-4 text-primary fw-bold count-animation" data-count="{{ flashcards|length }}">0</div>
+                <p class="text-muted mb-0">Total Flashcards</p>
             </div>
-            <hr>
         </div>
     </div>
-
-    {% if request.query_params.get('error') %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ request.query_params.get('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="col-md-4 mb-3">
+        <div class="card hover-card">
+            <div class="card-body text-center">
+                <div class="display-4 text-success fw-bold">{{ nav_info.languages|length }}</div>
+                <p class="text-muted mb-0">Languages</p>
+            </div>
+        </div>
     </div>
-    {% endif %}
+    <div class="col-md-4 mb-3">
+        <div class="card hover-card">
+            <div class="card-body text-center">
+                <div class="display-4 text-warning fw-bold">{{ nav_info.study_streak }}</div>
+                <p class="text-muted mb-0">Day Streak</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-    {% if flashcards|length == 0 %}
+<!-- Quick Actions -->
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 fw-bold mb-0">Quick Actions</h2>
+        <a href="/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New Flashcard
+        </a>
+    </div>
     <div class="row">
-        <div class="col-12">
-            <div class="ai-tool-container text-center py-5">
-                <i class="bi bi-emoji-smile fs-1 text-muted mb-3"></i>
-                <h3>No flashcards yet</h3>
-                <p class="text-muted">Create your first flashcard to get started!</p>
-                <a href="{{ url_for('create_get') }}" class="btn btn-primary mt-3">
-                    <i class="bi bi-plus-lg"></i> Create Flashcard
-                </a>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card tool-card text-center" data-href="/study">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h5 class="fw-bold">Study Mode</h5>
+                    <p class="text-muted small mb-0">Review your flashcards</p>
+                </div>
             </div>
         </div>
-    </div>
-    {% else %}
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <p class="text-muted mb-0">Total: <strong>{{ flashcards|length }}</strong> flashcards</p>
-                <div class="input-group" style="max-width: 300px;">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search flashcards...">
-                    <button class="btn btn-outline-primary" type="button">
-                        <i class="bi bi-search"></i>
-                    </button>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card tool-card text-center" data-href="/grammar">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-spell-check"></i>
+                    </div>
+                    <h5 class="fw-bold">Grammar Check</h5>
+                    <p class="text-muted small mb-0">Perfect your writing</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card tool-card text-center" data-href="/translate">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h5 class="fw-bold">Translate</h5>
+                    <p class="text-muted small mb-0">Language translation</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card tool-card text-center" data-href="/chatbot">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h5 class="fw-bold">AI Assistant</h5>
+                    <p class="text-muted small mb-0">Get help with anything</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row" id="flashcardsContainer">
-        {% for flashcard in flashcards %}
-        <div class="col-md-6 col-lg-4 mb-4 flashcard-item">
-            <div class="flashcard h-100">
-                <div class="flashcard-header">
-                    <h5 class="mb-0">{{ flashcard.word }}</h5>
-                    <span class="badge bg-light text-dark">{{ flashcard.language }}</span>
-                </div>
-                <div class="flashcard-body">
-                    {% if flashcard.pronunciation %}
-                    <div class="flashcard-pronunciation">{{ flashcard.pronunciation }}</div>
-                    {% endif %}
-                    
-                    <div class="flashcard-section">
-                        <div class="flashcard-section-title">
-                            <i class="bi bi-translate"></i> Translations
-                        </div>
-                        <div class="flashcard-translations">
-                            {% if flashcard.translations %}
-                                {% for translation in flashcard.translations.split(',') %}
-                                    <span class="translation-tag">{{ translation.strip() }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <span class="translation-tag">No translations</span>
-                            {% endif %}
-                        </div>
+<!-- Search Bar -->
+<div class="mb-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text" id="flashcard-search" class="form-control border-start-0" placeholder="Search flashcards...">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Flashcards Grid -->
+<div class="row" id="flashcards-container">
+    {% if flashcards|length > 0 %}
+        {% for card in flashcards %}
+        <div class="col-lg-4 col-md-6 mb-4 fade-in-element flashcard-item" data-word="{{ card.word }}" data-language="{{ card.language }}">
+            <div class="flashcard">
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <div class="word">{{ card.word }}</div>
+                        <div class="language">{{ card.language }}</div>
                     </div>
-                    
-                    <div class="flashcard-section">
-                        <div class="flashcard-section-title">
-                            <i class="bi bi-chat-quote"></i> Examples
+                    <div class="flashcard-back">
+                        <div class="translations mb-3">
+                            <div class="translations-title">Translations:</div>
+                            <div>{{ card.translations }}</div>
                         </div>
-                        <div class="flashcard-examples">
-                            {% if flashcard.examples %}
-                                {% for example in flashcard.examples.split('\n') %}
-                                    {% if example.strip() %}
-                                        <div class="example-item">{{ example.strip() }}</div>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <div class="example-item">No examples available</div>
-                            {% endif %}
+                        {% if card.pronunciation %}
+                        <div class="pronunciation mb-3">
+                            <div class="translations-title">Pronunciation:</div>
+                            <div>{{ card.pronunciation }}</div>
                         </div>
-                    </div>
-                    
-                    <div class="mt-3 pt-2 border-top d-flex justify-content-between">
-                        <div class="btn-group">
-                            <a href="{{ url_for('edit_get', flashcard_id=flashcard.id) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
+                        {% endif %}
+                        <div class="examples">
+                            <div class="examples-title">Examples:</div>
+                            {% for example in card.examples.split('|') %}
+                                {% if example.strip() %}
+                                <div class="example">{{ example.strip() }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="flashcard-actions">
+                            <a href="/edit/{{ card.id }}" class="btn btn-sm btn-light" title="Edit">
+                                <i class="fas fa-edit"></i>
                             </a>
-                            <button type="button" class="btn btn-sm btn-outline-danger" 
-                                    onclick="confirmDelete({{ flashcard.id }}, '{{ flashcard.word }}')">
-                                <i class="bi bi-trash"></i> Delete
-                            </button>
+                            <form action="/delete/{{ card.id }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this flashcard?');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
                         </div>
-                        <small class="text-muted align-self-center">
-                            Created: {{ flashcard.created_at.split(' ')[0] if flashcard.created_at else '' }}
-                        </small>
                     </div>
                 </div>
             </div>
         </div>
         {% endfor %}
-    </div>
-    {% endif %}
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete the flashcard "<span id="deleteCardName"></span>"?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteForm" method="post" action="">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
+    {% else %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-layer-group text-muted fa-4x"></i>
+                    </div>
+                    <h3 class="fw-bold">No Flashcards Yet</h3>
+                    <p class="text-muted">Create your first flashcard to get started!</p>
+                    <a href="/create" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i> Create Flashcard
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+    {% endif %}
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const query = this.value.toLowerCase();
-                const flashcards = document.querySelectorAll('.flashcard-item');
-                
-                flashcards.forEach(card => {
-                    const word = card.querySelector('.flashcard-header h5').textContent.toLowerCase();
-                    const translations = card.querySelectorAll('.translation-tag');
-                    let translationText = '';
-                    translations.forEach(t => translationText += t.textContent.toLowerCase() + ' ');
-                    
-                    if (word.includes(query) || translationText.includes(query)) {
-                        card.style.display = '';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
-        }
+        const searchInput = document.getElementById('flashcard-search');
+        const flashcardContainer = document.getElementById('flashcards-container');
+        const flashcardItems = document.querySelectorAll('.flashcard-item');
         
-        // Animate cards on load
-        const cards = document.querySelectorAll('.flashcard');
-        cards.forEach((card, index) => {
-            setTimeout(() => {
-                card.classList.add('fade-in-element');
-            }, index * 100); // Stagger animation
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            flashcardItems.forEach(item => {
+                const word = item.getAttribute('data-word').toLowerCase();
+                const language = item.getAttribute('data-language').toLowerCase();
+                
+                if (word.includes(searchTerm) || language.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Show no results message
+            const visibleCards = flashcardContainer.querySelectorAll('.flashcard-item[style="display: block"]');
+            const noResultsMessage = flashcardContainer.querySelector('.no-results-message');
+            
+            if (visibleCards.length === 0 && searchTerm !== '' && !noResultsMessage) {
+                const noResults = document.createElement('div');
+                noResults.className = 'col-12 no-results-message';
+                noResults.innerHTML = `
+                    <div class="card">
+                        <div class="card-body text-center py-4">
+                            <i class="fas fa-search text-muted fa-3x mb-3"></i>
+                            <h4>No flashcards found matching "${searchTerm}"</h4>
+                            <p class="text-muted">Try a different search term or create a new flashcard.</p>
+                        </div>
+                    </div>
+                `;
+                flashcardContainer.appendChild(noResults);
+            } else if ((visibleCards.length > 0 || searchTerm === '') && noResultsMessage) {
+                noResultsMessage.remove();
+            }
         });
     });
-    
-    // Delete confirmation
-    function confirmDelete(id, word) {
-        const deleteForm = document.getElementById('deleteForm');
-        const deleteCardName = document.getElementById('deleteCardName');
-        
-        deleteForm.action = `/delete/${id}`;
-        deleteCardName.textContent = word;
-        
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        deleteModal.show();
-    }
 </script>
 {% endblock %} 

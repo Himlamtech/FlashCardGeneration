@@ -1,72 +1,102 @@
-# Flash Card Generation using AI
+# StudyWAI - AI-Powered Flashcard Application
 
-A powerful flashcard application that leverages Google's Gemini AI to help you learn and memorize new words effectively.
-
-![Flash Card Generation Preview](app/static/img/readme.txt)
+StudyWAI is a modern, AI-powered flashcard application designed to help language learners create, study, and master vocabulary with the assistance of generative AI.
 
 ## Features
 
-- **AI-Powered Flashcards**: Create flashcards with Google's Gemini AI automatically generating translations, pronunciation, and example sentences
-- **Flashcard Management**: Create, edit, and delete flashcards as needed
-- **Interactive Study System**: User-friendly interface for studying your flashcards
-- **CSV Storage**: All flashcards are stored in CSV format for easy access and portability
-- **Additional AI Tools**: Grammar checking, text translation, and text summarization tools
+- **AI-Generated Flashcards**: Automatically generate comprehensive flashcards with translations, pronunciation guides, and example sentences
+- **Interactive Study Mode**: Review flashcards with a spaced repetition system to optimize learning
+- **Translation Tool**: Translate text between multiple languages and create flashcards directly from translations
+- **Grammar Checking**: Check your writing for grammar, spelling, style, and punctuation issues
+- **Text Summarization**: Summarize long texts and extract key terms for flashcard creation
+- **AI Assistant**: Chat with an AI tutor to get help with language learning questions
+- **Modern UI**: Clean and responsive design that works on desktop and mobile devices
 
-## Setup
+## Technology Stack
+image.png
+- **Backend**: FastAPI (Python)
+- **Frontend**: HTML, CSS, JavaScript, Bootstrap 5, jQuery
+- **Database**: SQLite (via SQLAlchemy)
+- **AI**: Google Gemini AI
 
-### Prerequisites
-
-- Python 3.8 or higher
-- A Google Gemini API key (get one at [Google AI Studio](https://makersuite.google.com/app/apikey))
-
-### Installation
+## Installation
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/flashcard-generation.git
-   cd flashcard-generation
-   ```
+```bash
+git clone https://github.com/yourusername/studywai.git
+cd studywai
+```
 
-2. Install the required packages:
-   ```
-   pip install -r requirements.txt
-   ```
+2. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-3. Create a `.env` file in the project root with your Gemini API key:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-4. Run the application:
-   ```
-   python app.py
-   ```
+4. Create a `.env` file in the root directory with your Google Gemini API key:
+```
+GOOGLE_AI_API_KEY=your_api_key_here
+```
 
-5. Open your browser and go to `http://127.0.0.1:5000`
+5. Run the application:
+```bash
+uvicorn app.app:app --reload
+```
 
-## Usage
+6. Open your browser and navigate to http://localhost:8000
 
-1. **Create Flashcards**: Click the "Create Flashcard" button, enter a word, and select the language. The AI will generate translations, pronunciation, and example sentences.
+## Project Structure
 
-2. **Study Flashcards**: Navigate to the Study page to review your flashcards.
+```
+studywai/
+├── app/
+│   ├── static/
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── img/
+│   └── templates/
+├── ai/
+├── database/
+├── models/
+├── utils/
+├── app.py
+├── .env
+└── requirements.txt
+```
 
-3. **Edit or Delete Flashcards**: Click the edit or delete buttons on any flashcard to modify or remove it.
+## API Endpoints
 
-4. **Use AI Tools**: Access the grammar check, translation, and summarization tools in the Study page.
+The application exposes the following API endpoints:
 
-## Technologies Used
+- `/api/translate` - Translate text between languages
+- `/api/grammar-check` - Check text for grammar issues
+- `/api/summarize` - Summarize long text
+- `/api/extract-url` - Extract text from a URL
+- `/api/chat` - Chat with the AI assistant
 
-- **Backend**: FastAPI
-- **Frontend**: Bootstrap 5, jQuery
-- **AI**: Google Generative AI (Gemini 2.0 Flash Lite)
-- **Data Management**: Pandas
-- **Deployment**: Uvicorn
+## Development
+
+To contribute to this project:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/your-feature`)
+3. Make your changes
+4. Run tests (`pytest`)
+5. Commit your changes (`git commit -m 'Add some feature'`)
+6. Push to the branch (`git push origin feature/your-feature`)
+7. Open a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
+## Acknowledgements
 
-- Inspired by Quizlet's flashcard system
-- Powered by Google's Gemini AI 
+- Google Gemini AI for powering the generative AI features
+- FastAPI for the backend framework
+- Bootstrap for the frontend components 

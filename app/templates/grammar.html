@@ -1,56 +1,166 @@
 {% extends "base.html" %}
 
-{% block title %}Grammar Check - FlashCard Generation{% endblock %}
+{% block title %}Grammar Check - StudyWAI{% endblock %}
+
+{% block page_title %}Grammar Checker{% endblock %}
+{% block page_subtitle %}Check and improve your writing with AI-powered grammar and style suggestions.{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row mb-4 fade-in-element">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0"><i class="bi bi-check-square me-2"></i>Grammar Check</h2>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form id="grammar-form">
+                    <div class="mb-3">
+                        <label for="language-select" class="form-label">Language:</label>
+                        <select id="language-select" class="form-select" name="language">
+                            <option value="english" selected>English</option>
+                            <option value="spanish">Spanish</option>
+                            <option value="french">French</option>
+                            <option value="german">German</option>
+                            <option value="italian">Italian</option>
+                            <option value="portuguese">Portuguese</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="text-input" class="form-label">Text to check:</label>
+                        <div class="position-relative">
+                            <textarea id="text-input" name="text" class="form-control" rows="10" placeholder="Enter your text here..." required></textarea>
+                            <div class="text-muted small mt-1 text-end">
+                                <span id="char-count">0</span> / 5000 characters
+                            </div>
+                            <div class="mt-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" value="grammar" id="check-grammar" name="check_types" checked>
+                                    <label class="form-check-label" for="check-grammar">Grammar</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" value="spelling" id="check-spelling" name="check_types" checked>
+                                    <label class="form-check-label" for="check-spelling">Spelling</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" value="style" id="check-style" name="check_types" checked>
+                                    <label class="form-check-label" for="check-style">Style & Clarity</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" value="punctuation" id="check-punctuation" name="check_types" checked>
+                                    <label class="form-check-label" for="check-punctuation">Punctuation</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" id="check-button" class="btn btn-primary px-4">
+                            <i class="fas fa-check-circle me-2"></i> Check Text
+                        </button>
+                        <button type="button" id="clear-button" class="btn btn-light ms-2">
+                            <i class="fas fa-eraser me-2"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Results section -->
+        <div id="results-section" class="mt-4" style="display: none;">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-spell-check me-2 text-primary"></i> Analysis Results
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <p class="card-text">Improve your writing with our AI-powered grammar checker. Enter your text below to check for grammar, spelling, and style issues.</p>
-                    
-                    <form id="grammarForm" class="mt-4">
-                        <div class="mb-3">
-                            <label for="grammarText" class="form-label">Enter text to check:</label>
-                            <textarea id="grammarText" class="form-control" rows="6" placeholder="Enter your text here..."></textarea>
-                            <div class="form-text">Our grammar checker will identify and correct spelling errors, grammar mistakes, and suggest style improvements.</div>
-                        </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-primary">
-                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                <i class="bi bi-check-circle me-1"></i> Check Grammar
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <div id="grammarResult" class="mt-4 d-none">
-                        <div class="alert alert-success">
-                            <i class="bi bi-check-circle-fill me-2"></i>Grammar check completed successfully!
-                        </div>
-                        <div class="card border-success">
-                            <div class="card-header bg-success bg-opacity-10">
-                                <h5 class="mb-0 text-success"><i class="bi bi-pencil me-2"></i>Corrected Text</h5>
+                <div class="card-body p-4">
+                    <div id="summary-section" class="mb-4">
+                        <div class="d-flex flex-wrap">
+                            <div class="me-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <div class="text-muted">Overall Score</div>
+                                        <div class="fs-4 fw-bold" id="overall-score">--</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div id="grammarCorrected" class="p-3 bg-light rounded"></div>
+                            
+                            <div class="me-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <div class="text-muted">Errors</div>
+                                        <div class="fs-4 fw-bold" id="error-count">--</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="me-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <div class="text-muted">Warnings</div>
+                                        <div class="fs-4 fw-bold" id="warning-count">--</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <div class="text-muted">Suggestions</div>
+                                        <div class="fs-4 fw-bold" id="suggestion-count">--</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                            <button type="button" class="btn btn-outline-primary" onclick="copyToClipboard('grammarCorrected')">
-                                <i class="bi bi-clipboard me-1"></i> Copy to Clipboard
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="createFlashcardFromText('grammarCorrected')">
-                                <i class="bi bi-plus-circle me-1"></i> Create Flashcard
+                    </div>
+                    
+                    <div id="issues-list" class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">Issues Found</h6>
+                        <div id="no-issues" class="alert alert-success" style="display: none;">
+                            <i class="fas fa-check-circle me-2"></i> No issues found! Your text looks good.
+                        </div>
+                        <div id="issues-container"></div>
+                    </div>
+                    
+                    <div id="improved-text-section">
+                        <h6 class="border-bottom pb-2 mb-3">Improved Text</h6>
+                        <div class="position-relative">
+                            <textarea id="improved-text" class="form-control" rows="10" readonly></textarea>
+                            <button id="copy-improved" class="btn btn-sm btn-light position-absolute top-0 end-0 mt-2 me-2">
+                                <i class="fas fa-copy me-1"></i> Copy
                             </button>
                         </div>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <button id="create-flashcards-btn" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i> Create Flashcards from Corrections
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75" style="display: none; z-index: 1050;">
+    <div class="text-center">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5>Analyzing your text...</h5>
+        <p class="text-muted">This may take a few seconds</p>
     </div>
 </div>
 {% endblock %}
@@ -58,61 +168,224 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle grammar check form submission
-        const grammarForm = document.getElementById('grammarForm');
-        if (grammarForm) {
-            grammarForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const text = document.getElementById('grammarText').value;
-                if (!text) {
-                    alert('Please enter some text to check.');
-                    return;
-                }
-                
-                const spinner = this.querySelector('.spinner-border');
-                const submitBtn = this.querySelector('button[type="submit"]');
-                
-                spinner.classList.remove('d-none');
-                submitBtn.disabled = true;
-                
-                fetch('/api/check-grammar', {
+        // Elements
+        const form = document.getElementById('grammar-form');
+        const textInput = document.getElementById('text-input');
+        const charCount = document.getElementById('char-count');
+        const checkButton = document.getElementById('check-button');
+        const clearButton = document.getElementById('clear-button');
+        const resultsSection = document.getElementById('results-section');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const improvedText = document.getElementById('improved-text');
+        const copyImproved = document.getElementById('copy-improved');
+        const createFlashcardsBtn = document.getElementById('create-flashcards-btn');
+        
+        // Score elements
+        const overallScore = document.getElementById('overall-score');
+        const errorCount = document.getElementById('error-count');
+        const warningCount = document.getElementById('warning-count');
+        const suggestionCount = document.getElementById('suggestion-count');
+        
+        // Issues elements
+        const issuesContainer = document.getElementById('issues-container');
+        const noIssues = document.getElementById('no-issues');
+        
+        // Update character count
+        textInput.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = count;
+            
+            // Warn if approaching limit
+            if (count > 4500) {
+                charCount.classList.add('text-danger');
+            } else {
+                charCount.classList.remove('text-danger');
+            }
+            
+            // Limit input
+            if (count > 5000) {
+                this.value = this.value.substring(0, 5000);
+                charCount.textContent = 5000;
+            }
+        });
+        
+        // Clear button
+        clearButton.addEventListener('click', function() {
+            textInput.value = '';
+            charCount.textContent = '0';
+            charCount.classList.remove('text-danger');
+            resultsSection.style.display = 'none';
+        });
+        
+        // Form submission
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Validate
+            if (!textInput.value.trim()) {
+                textInput.focus();
+                return;
+            }
+            
+            // Get selected check types
+            const checkTypes = [];
+            document.querySelectorAll('input[name="check_types"]:checked').forEach(checkbox => {
+                checkTypes.push(checkbox.value);
+            });
+            
+            if (checkTypes.length === 0) {
+                alert('Please select at least one check type.');
+                return;
+            }
+            
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                const response = await fetch('/api/grammar-check', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ text: text })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('grammarCorrected').textContent = data.corrected_text;
-                    document.getElementById('grammarResult').classList.remove('d-none');
-                    document.getElementById('grammarResult').scrollIntoView({ behavior: 'smooth' });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                })
-                .finally(() => {
-                    spinner.classList.add('d-none');
-                    submitBtn.disabled = false;
+                    body: JSON.stringify({
+                        text: textInput.value,
+                        language: document.getElementById('language-select').value,
+                        check_types: checkTypes
+                    }),
                 });
-            });
-        }
-    });
-    
-    // Copy text to clipboard
-    function copyToClipboard(elementId) {
-        const text = document.getElementById(elementId).textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            // Show toast or some notification
-            alert('Text copied to clipboard!');
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Update results
+                updateResults(data);
+                
+                // Show results section
+                resultsSection.style.display = 'block';
+                
+                // Scroll to results
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+            } catch (error) {
+                console.error('Grammar check error:', error);
+                
+                // Show error message
+                alert(`Error: ${error.message || 'Failed to check grammar. Please try again.'}`);
+                
+            } finally {
+                // Hide loading overlay
+                loadingOverlay.style.display = 'none';
+            }
         });
-    }
-    
-    // Create flashcard from corrected text
-    function createFlashcardFromText(elementId) {
-        const text = document.getElementById(elementId).textContent;
-        window.location.href = `/create?answer=${encodeURIComponent(text)}`;
-    }
+        
+        // Copy improved text
+        copyImproved.addEventListener('click', async function() {
+            if (!improvedText.value) return;
+            
+            try {
+                await navigator.clipboard.writeText(improvedText.value);
+                
+                // Show feedback
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                
+                // Fallback
+                improvedText.select();
+                document.execCommand('copy');
+            }
+        });
+        
+        // Update results display
+        function updateResults(data) {
+            // Update summary stats
+            overallScore.textContent = data.overall_score + '/100';
+            errorCount.textContent = data.issues.filter(i => i.severity === 'error').length;
+            warningCount.textContent = data.issues.filter(i => i.severity === 'warning').length;
+            suggestionCount.textContent = data.issues.filter(i => i.severity === 'suggestion').length;
+            
+            // Update improved text
+            improvedText.value = data.improved_text || textInput.value;
+            
+            // Clear previous issues
+            issuesContainer.innerHTML = '';
+            
+            // Show/hide no issues message
+            if (data.issues.length === 0) {
+                noIssues.style.display = 'block';
+            } else {
+                noIssues.style.display = 'none';
+                
+                // Add each issue
+                data.issues.forEach((issue, index) => {
+                    const issueElement = document.createElement('div');
+                    issueElement.className = 'card mb-3 border-0 shadow-sm';
+                    
+                    // Determine icon and color based on severity
+                    let icon, color;
+                    switch (issue.severity) {
+                        case 'error':
+                            icon = 'fa-times-circle';
+                            color = 'danger';
+                            break;
+                        case 'warning':
+                            icon = 'fa-exclamation-triangle';
+                            color = 'warning';
+                            break;
+                        default:
+                            icon = 'fa-lightbulb';
+                            color = 'success';
+                    }
+                    
+                    issueElement.innerHTML = `
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas ${icon} text-${color} me-2"></i>
+                                <h6 class="mb-0 text-capitalize">${issue.severity}: ${issue.type}</h6>
+                            </div>
+                            <div class="mb-2">
+                                <div class="small text-muted mb-1">Original:</div>
+                                <div class="p-2 bg-light rounded">${issue.original}</div>
+                            </div>
+                            ${issue.suggestion ? `
+                                <div>
+                                    <div class="small text-muted mb-1">Suggestion:</div>
+                                    <div class="p-2 bg-light rounded text-success">${issue.suggestion}</div>
+                                </div>
+                            ` : ''}
+                            ${issue.explanation ? `
+                                <div class="mt-2 small">
+                                    <i class="fas fa-info-circle me-1 text-primary"></i> ${issue.explanation}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    issuesContainer.appendChild(issueElement);
+                });
+            }
+        }
+        
+        // Create flashcards button
+        createFlashcardsBtn.addEventListener('click', function() {
+            // Navigate to flashcard creation with improved text
+            if (improvedText.value) {
+                // You can implement this according to your app's needs
+                // This example opens a new tab with the flashcard creation page
+                // and passes the improved text as a URL parameter
+                const encodedText = encodeURIComponent(improvedText.value);
+                window.location.href = `/create?prefill=${encodedText}`;
+            }
+        });
+    });
 </script>
 {% endblock %} 

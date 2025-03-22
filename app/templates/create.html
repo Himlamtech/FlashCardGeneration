@@ -1,114 +1,121 @@
 {% extends "base.html" %}
 
-{% block title %}Create Flashcard - StudyWAI{% endblock %}
+{% block title %}Create New Flashcard - StudyWAI{% endblock %}
 
-{% block head %}
-<style>
-    .ai-suggestions {
-        transition: all 0.3s ease;
-    }
-</style>
-{% endblock %}
+{% block page_title %}Create Flashcard{% endblock %}
+{% block page_subtitle %}Enter a word and let AI generate a comprehensive flashcard for you.{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="display-5 mb-0">
-                    <i class="bi bi-plus-square text-primary me-2"></i> Create Flashcard
-                </h1>
-                <a href="{{ url_for('home') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-arrow-left"></i> Back to List
-                </a>
-            </div>
-            <hr>
-        </div>
-    </div>
-
-    {% if error %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ error }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endif %}
-
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="ai-tool-container">
-                <div class="ai-tool-header">
-                    <h2>
-                        <i class="bi bi-magic text-primary"></i> 
-                        AI-Powered Flashcard Creation
-                    </h2>
-                    <p class="text-muted">Enter a word and let AI generate all the details for your flashcard</p>
-                </div>
-                
-                <form method="post" action="/create" class="ai-tool-form">
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" action="/create">
                     <div class="mb-4">
-                        <label for="word" class="form-label">
-                            <i class="bi bi-type text-primary me-1"></i> 
-                            <strong>Word or Phrase</strong>
-                        </label>
-                        <input type="text" class="form-control form-control-lg" id="word" name="word" 
-                               placeholder="Enter a word or phrase" required autofocus>
-                        <div class="form-text">
-                            <i class="bi bi-info-circle"></i> 
-                            Enter any word you want to create a flashcard for
+                        <label for="word" class="form-label">Word or Phrase:</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-keyboard text-primary"></i>
+                            </span>
+                            <input type="text" id="word" name="word" 
+                                   class="form-control border-start-0 form-control-lg" 
+                                   placeholder="Enter a word or phrase..." 
+                                   required autofocus>
+                        </div>
+                        <div class="form-text text-muted">
+                            Enter any word or phrase you want to learn.
                         </div>
                     </div>
                     
                     <div class="mb-4">
-                        <label for="language" class="form-label">
-                            <i class="bi bi-globe text-primary me-1"></i> 
-                            <strong>Language</strong>
-                        </label>
-                        <select class="form-select" id="language" name="language">
-                            <option value="english" selected>English</option>
-                            <option value="french">French</option>
-                            <option value="spanish">Spanish</option>
-                            <option value="german">German</option>
-                            <option value="italian">Italian</option>
-                            <option value="portuguese">Portuguese</option>
-                            <option value="russian">Russian</option>
-                            <option value="japanese">Japanese</option>
-                            <option value="chinese">Chinese</option>
-                            <option value="korean">Korean</option>
-                        </select>
+                        <label for="language" class="form-label">Language:</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-language text-primary"></i>
+                            </span>
+                            <select id="language" name="language" class="form-select border-start-0">
+                                <option value="english">English</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="french">French</option>
+                                <option value="german">German</option>
+                                <option value="italian">Italian</option>
+                                <option value="portuguese">Portuguese</option>
+                                <option value="russian">Russian</option>
+                                <option value="japanese">Japanese</option>
+                                <option value="korean">Korean</option>
+                                <option value="chinese">Chinese</option>
+                                <option value="arabic">Arabic</option>
+                                <option value="hindi">Hindi</option>
+                            </select>
+                        </div>
+                        <div class="form-text text-muted">
+                            Select the language of the word.
+                        </div>
+                    </div>
+                    
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-magic text-primary me-2"></i>
+                                AI-Powered Generation
+                            </h5>
+                            <p class="card-text text-muted">
+                                Our AI will automatically generate:
+                            </p>
+                            <ul class="text-muted mb-0">
+                                <li>Translations in multiple languages</li>
+                                <li>Accurate pronunciation guide</li>
+                                <li>Example sentences for context</li>
+                                <li>Usage tips and common phrases</li>
+                            </ul>
+                        </div>
                     </div>
                     
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
-                            <i class="bi bi-stars me-2"></i>
-                            <span>Generate Flashcard</span>
-                            <div class="loading-dots d-none ms-2">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-wand-magic-sparkles me-2"></i>
+                            Generate Flashcard
                         </button>
                     </div>
                 </form>
-                
-                <div class="mt-4 border-top pt-4">
-                    <h5>
-                        <i class="bi bi-lightbulb text-warning"></i> 
-                        How It Works
-                    </h5>
-                    <div class="card border-0 bg-light">
-                        <div class="card-body">
-                            <ol class="mb-0">
-                                <li class="mb-2">Enter any word or phrase you want to study</li>
-                                <li class="mb-2">Select the language of your word</li>
-                                <li class="mb-2">Our AI will generate:
-                                    <ul>
-                                        <li>Accurate translations</li>
-                                        <li>Proper pronunciation</li>
-                                        <li>Example sentences showing usage</li>
-                                    </ul>
-                                </li>
-                                <li>Review, study, and master your new vocabulary!</li>
-                            </ol>
+            </div>
+        </div>
+        
+        <div class="card mt-4 border-0 bg-transparent">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">AI-Generated Learning Tips</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 hover-card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="text-primary mb-2">
+                                    <i class="fas fa-brain fa-2x"></i>
+                                </div>
+                                <h6 class="fw-bold">Spaced Repetition</h6>
+                                <p class="text-muted small mb-0">Review cards at increasing intervals to improve long-term memory retention.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 hover-card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="text-primary mb-2">
+                                    <i class="fas fa-microphone-alt fa-2x"></i>
+                                </div>
+                                <h6 class="fw-bold">Say It Out Loud</h6>
+                                <p class="text-muted small mb-0">Speaking words aloud helps reinforce pronunciation and memory.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 hover-card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="text-primary mb-2">
+                                    <i class="fas fa-pen-fancy fa-2x"></i>
+                                </div>
+                                <h6 class="fw-bold">Write It Down</h6>
+                                <p class="text-muted small mb-0">Practice writing words and phrases to engage motor memory.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -116,19 +123,45 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const generateBtn = document.getElementById('generateBtn');
-    const loadingDots = document.querySelector('.loading-dots');
-    
-    form.addEventListener('submit', function() {
-        // Show loading state
-        generateBtn.querySelector('span').textContent = 'Generating';
-        loadingDots.classList.remove('d-none');
-        generateBtn.disabled = true;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation for the form submission
+        const form = document.querySelector('form');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        form.addEventListener('submit', function() {
+            // Change button text and add loading animation
+            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Generating...';
+            submitBtn.disabled = true;
+            
+            // Add pulsing effect to the card
+            const card = form.closest('.card');
+            card.classList.add('pulse-animation');
+        });
+        
+        // Autofocus on word input
+        document.getElementById('word').focus();
     });
-});
 </script>
+
+<style>
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(62, 104, 255, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(62, 104, 255, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(62, 104, 255, 0);
+        }
+    }
+</style>
 {% endblock %} 

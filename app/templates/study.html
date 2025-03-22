@@ -2,374 +2,466 @@
 
 {% block title %}Study Flashcards - StudyWAI{% endblock %}
 
-{% block head %}
+{% block page_title %}Study Mode{% endblock %}
+{% block page_subtitle %}Review your flashcards and track your progress.{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% if flashcards|length > 0 %}
+        <!-- Study Controls -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3 text-primary">
+                                <i class="fas fa-filter fa-lg"></i>
+                            </div>
+                            <select id="language-filter" class="form-select">
+                                <option value="all">All Languages</option>
+                                {% for language in nav_info.languages %}
+                                <option value="{{ language }}">{{ language|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0 text-center">
+                        <div class="study-counter fw-bold text-primary h4 mb-0">1/{{ flashcards|length }}</div>
+                        <div class="text-muted small">Cards</div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="form-check form-switch d-inline-block me-3">
+                            <input class="form-check-input" type="checkbox" id="shuffle-cards">
+                            <label class="form-check-label" for="shuffle-cards">Shuffle</label>
+                        </div>
+                        <button id="reset-progress" class="btn btn-sm btn-light">
+                            <i class="fas fa-sync-alt me-1"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Study Container -->
+        <div class="study-container mb-4" tabindex="0">
+            {% for card in flashcards %}
+            <div class="flashcard study-card" data-language="{{ card.language }}">
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <div class="word">{{ card.word }}</div>
+                        <div class="language">{{ card.language }}</div>
+                        <div class="text-center mt-4 text-white-50">
+                            <small>Click to flip</small>
+                        </div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="translations mb-3">
+                            <div class="translations-title">Translations:</div>
+                            <div>{{ card.translations }}</div>
+                        </div>
+                        {% if card.pronunciation %}
+                        <div class="pronunciation mb-3">
+                            <div class="translations-title">Pronunciation:</div>
+                            <div>{{ card.pronunciation }}</div>
+                        </div>
+                        {% endif %}
+                        <div class="examples">
+                            <div class="examples-title">Examples:</div>
+                            {% for example in card.examples.split('|') %}
+                                {% if example.strip() %}
+                                <div class="example">{{ example.strip() }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Navigation Controls -->
+        <div class="study-controls mb-4">
+            <button class="btn btn-light study-prev">
+                <i class="fas fa-chevron-left me-2"></i> Previous
+            </button>
+            <div class="btn-group mx-2">
+                <button class="btn btn-outline-danger mark-incorrect">
+                    <i class="fas fa-times me-1"></i> Incorrect
+                </button>
+                <button class="btn btn-outline-success mark-correct">
+                    <i class="fas fa-check me-1"></i> Correct
+                </button>
+            </div>
+            <button class="btn btn-primary study-next">
+                Next <i class="fas fa-chevron-right ms-2"></i>
+            </button>
+        </div>
+        
+        <!-- Study Progress -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Study Progress</h5>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar bg-success" id="correct-progress" role="progressbar" style="width: 0%"></div>
+                    <div class="progress-bar bg-danger" id="incorrect-progress" role="progressbar" style="width: 0%"></div>
+                    <div class="progress-bar bg-light" id="remaining-progress" role="progressbar" style="width: 100%"></div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div class="progress-stat">
+                        <span class="badge bg-success me-1">
+                            <i class="fas fa-check"></i>
+                        </span>
+                        <span id="correct-count">0</span> Correct
+                    </div>
+                    <div class="progress-stat">
+                        <span class="badge bg-danger me-1">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        <span id="incorrect-count">0</span> Incorrect
+                    </div>
+                    <div class="progress-stat">
+                        <span class="badge bg-light text-dark me-1">
+                            <i class="fas fa-hourglass-half"></i>
+                        </span>
+                        <span id="remaining-count">{{ flashcards|length }}</span> Remaining
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Study Tips -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Keyboard Shortcuts</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark me-2">Space</span>
+                            <span class="text-muted">Flip card</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark me-2">←</span>
+                            <span class="text-muted">Previous card</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark me-2">→</span>
+                            <span class="text-muted">Next card</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark me-2">1</span>
+                            <span class="text-muted">Mark incorrect</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark me-2">2</span>
+                            <span class="text-muted">Mark correct</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- No Flashcards State -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-book text-muted fa-4x"></i>
+                </div>
+                <h3 class="fw-bold">No Flashcards to Study</h3>
+                <p class="text-muted">Create some flashcards first to start studying.</p>
+                <a href="/create" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> Create Flashcard
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if(document.querySelector('.study-container')) {
+            // Variables to track study progress
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let currentIndex = 0;
+            let studyCards = Array.from(document.querySelectorAll('.study-card'));
+            const totalCards = studyCards.length;
+            
+            // Elements
+            const correctCounter = document.getElementById('correct-count');
+            const incorrectCounter = document.getElementById('incorrect-count');
+            const remainingCounter = document.getElementById('remaining-count');
+            const correctProgress = document.getElementById('correct-progress');
+            const incorrectProgress = document.getElementById('incorrect-progress');
+            const remainingProgress = document.getElementById('remaining-progress');
+            const languageFilter = document.getElementById('language-filter');
+            const shuffleCheckbox = document.getElementById('shuffle-cards');
+            const resetButton = document.getElementById('reset-progress');
+            const markCorrectBtn = document.querySelector('.mark-correct');
+            const markIncorrectBtn = document.querySelector('.mark-incorrect');
+            
+            // Hide all cards except the first one
+            function initializeCards() {
+                studyCards.forEach((card, i) => {
+                    if (i === 0) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                    card.classList.remove('flipped');
+                });
+                
+                // Update counter
+                updateCounter();
+            }
+            
+            // Update the counter display
+            function updateCounter() {
+                const studyCounter = document.querySelector('.study-counter');
+                if (studyCounter && studyCards.length > 0) {
+                    studyCounter.textContent = `${currentIndex + 1}/${studyCards.length}`;
+                }
+            }
+            
+            // Update progress bars
+            function updateProgress() {
+                const correctPercentage = (correctCount / totalCards) * 100;
+                const incorrectPercentage = (incorrectCount / totalCards) * 100;
+                const remainingPercentage = 100 - correctPercentage - incorrectPercentage;
+                
+                correctProgress.style.width = `${correctPercentage}%`;
+                incorrectProgress.style.width = `${incorrectPercentage}%`;
+                remainingProgress.style.width = `${remainingPercentage}%`;
+                
+                correctCounter.textContent = correctCount;
+                incorrectCounter.textContent = incorrectCount;
+                remainingCounter.textContent = totalCards - correctCount - incorrectCount;
+            }
+            
+            // Filter cards by language
+            function filterCardsByLanguage(language) {
+                if (language === 'all') {
+                    studyCards = Array.from(document.querySelectorAll('.study-card'));
+                } else {
+                    studyCards = Array.from(document.querySelectorAll(`.study-card[data-language="${language}"]`));
+                }
+                
+                // Reset current index and progress
+                currentIndex = 0;
+                correctCount = 0;
+                incorrectCount = 0;
+                
+                if (studyCards.length > 0) {
+                    document.querySelector('.study-container').style.display = 'block';
+                    document.querySelector('.study-controls').style.display = 'flex';
+                    initializeCards();
+                    updateProgress();
+                } else {
+                    document.querySelector('.study-container').innerHTML = `
+                        <div class="card">
+                            <div class="card-body text-center py-5">
+                                <div class="mb-3">
+                                    <i class="fas fa-filter text-muted fa-4x"></i>
+                                </div>
+                                <h3 class="fw-bold">No ${language} Flashcards</h3>
+                                <p class="text-muted">Try selecting a different language filter.</p>
+                            </div>
+                        </div>
+                    `;
+                    document.querySelector('.study-controls').style.display = 'none';
+                }
+            }
+            
+            // Shuffle the cards
+            function shuffleCards() {
+                for (let i = studyCards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [studyCards[i], studyCards[j]] = [studyCards[j], studyCards[i]];
+                }
+                
+                currentIndex = 0;
+                initializeCards();
+            }
+            
+            // Initialize study mode
+            initializeCards();
+            updateProgress();
+            
+            // Event listeners for navigation
+            document.querySelector('.study-next').addEventListener('click', () => {
+                if (currentIndex < studyCards.length - 1) {
+                    currentIndex++;
+                    initializeCards();
+                }
+            });
+            
+            document.querySelector('.study-prev').addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    initializeCards();
+                }
+            });
+            
+            // Mark as correct/incorrect
+            markCorrectBtn.addEventListener('click', () => {
+                correctCount++;
+                updateProgress();
+                
+                // Show animation
+                markCorrectBtn.classList.add('btn-success');
+                markCorrectBtn.classList.remove('btn-outline-success');
+                
+                setTimeout(() => {
+                    markCorrectBtn.classList.add('btn-outline-success');
+                    markCorrectBtn.classList.remove('btn-success');
+                    
+                    // Move to next card
+                    if (currentIndex < studyCards.length - 1) {
+                        currentIndex++;
+                        initializeCards();
+                    }
+                }, 500);
+            });
+            
+            markIncorrectBtn.addEventListener('click', () => {
+                incorrectCount++;
+                updateProgress();
+                
+                // Show animation
+                markIncorrectBtn.classList.add('btn-danger');
+                markIncorrectBtn.classList.remove('btn-outline-danger');
+                
+                setTimeout(() => {
+                    markIncorrectBtn.classList.add('btn-outline-danger');
+                    markIncorrectBtn.classList.remove('btn-danger');
+                    
+                    // Move to next card
+                    if (currentIndex < studyCards.length - 1) {
+                        currentIndex++;
+                        initializeCards();
+                    }
+                }, 500);
+            });
+            
+            // Language filter
+            languageFilter.addEventListener('change', function() {
+                filterCardsByLanguage(this.value);
+            });
+            
+            // Shuffle checkbox
+            shuffleCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    shuffleCards();
+                } else {
+                    // Reset to original order
+                    studyCards = Array.from(document.querySelectorAll('.study-card'));
+                    if (languageFilter.value !== 'all') {
+                        filterCardsByLanguage(languageFilter.value);
+                    } else {
+                        currentIndex = 0;
+                        initializeCards();
+                    }
+                }
+            });
+            
+            // Reset progress
+            resetButton.addEventListener('click', function() {
+                correctCount = 0;
+                incorrectCount = 0;
+                currentIndex = 0;
+                initializeCards();
+                updateProgress();
+                
+                // Show animation
+                this.innerHTML = '<i class="fas fa-check me-1"></i> Reset';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Reset';
+                }, 1000);
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (document.querySelector('.study-container:focus-within') || 
+                    document.activeElement === document.body) {
+                    // Arrow keys navigation
+                    if (e.key === 'ArrowRight') {
+                        document.querySelector('.study-next').click();
+                    } else if (e.key === 'ArrowLeft') {
+                        document.querySelector('.study-prev').click();
+                    } else if (e.key === ' ' || e.key === 'Enter') {
+                        // Toggle flip with spacebar or enter
+                        studyCards[currentIndex].classList.toggle('flipped');
+                    } else if (e.key === '1') {
+                        // Mark incorrect with 1 key
+                        markIncorrectBtn.click();
+                    } else if (e.key === '2') {
+                        // Mark correct with 2 key
+                        markCorrectBtn.click();
+                    }
+                }
+            });
+        }
+    });
+</script>
+
 <style>
-    .flashcard-container {
-        height: 400px;
-        perspective: 1000px;
-        margin-bottom: 2rem;
-    }
-    
-    .flashcard-wrapper {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        transform-style: preserve-3d;
-        transition: transform 0.8s ease;
-    }
-    
-    .flashcard-wrapper.flipped {
-        transform: rotateY(180deg);
-    }
-    
-    .flashcard-side {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        backface-visibility: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        overflow: auto;
-    }
-    
-    .flashcard-front {
-        background: linear-gradient(145deg, #ffffff, #f5f5f5);
-        z-index: 2;
-    }
-    
-    .flashcard-back {
-        background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-        transform: rotateY(180deg);
-        z-index: 1;
-    }
-    
-    .flashcard-content {
-        max-width: 100%;
-        overflow: auto;
-    }
-    
-    .flashcard-question {
-        font-size: 1.5rem;
-        font-weight: 500;
-        color: #212529;
-        text-align: center;
-    }
-    
-    .flashcard-answer {
-        font-size: 1.25rem;
-        color: #343a40;
-    }
-    
+    /* Custom styles for study page */
     .study-controls {
         display: flex;
         justify-content: center;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    /* Custom animations */
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+        align-items: center;
+        gap: 0.5rem;
     }
     
-    .highlight-btn {
-        animation: pulse 1s infinite;
+    .progress-stat {
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .study-container {
+        min-height: 300px;
+        outline: none;
+    }
+    
+    .mark-correct:hover {
+        background-color: var(--success-color);
+        color: white;
+        border-color: var(--success-color);
+    }
+    
+    .mark-incorrect:hover {
+        background-color: var(--danger-color);
+        color: white;
+        border-color: var(--danger-color);
+    }
+    
+    /* Animation for correct/incorrect marking */
+    @keyframes pulse-correct {
+        0% { box-shadow: 0 0 0 0 rgba(0, 184, 121, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 184, 121, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 184, 121, 0); }
+    }
+    
+    @keyframes pulse-incorrect {
+        0% { box-shadow: 0 0 0 0 rgba(255, 92, 92, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 92, 92, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 92, 92, 0); }
     }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="display-5 mb-0">
-                    <i class="bi bi-book text-primary me-2"></i> Study Flashcards
-                </h1>
-                <a href="{{ url_for('home') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-arrow-left"></i> Back to List
-                </a>
-            </div>
-            <hr>
-        </div>
-    </div>
-
-    {% if flashcards|length == 0 %}
-    <div class="row">
-        <div class="col-12">
-            <div class="ai-tool-container text-center py-5">
-                <i class="bi bi-emoji-smile fs-1 text-muted mb-3"></i>
-                <h3>No flashcards to study yet</h3>
-                <p class="text-muted">Create some flashcards first to start studying.</p>
-                <a href="{{ url_for('create_get') }}" class="btn btn-primary mt-3">
-                    <i class="bi bi-plus-lg"></i> Create Flashcards
-                </a>
-            </div>
-        </div>
-    </div>
-    {% else %}
-    <div class="row">
-        <div class="col-12">
-            <div class="card-counter text-center mb-4">
-                <span class="badge bg-primary p-2">Card <span id="currentCard">1</span> of {{ flashcards|length }}</span>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="flip-card-container">
-                <div class="flip-card" id="flashcardElement">
-                    <div class="flip-card-front" id="cardFront">
-                        <span class="badge bg-light text-primary position-absolute top-0 end-0 m-3">
-                            <i class="bi bi-hand-index-thumb"></i> Click to flip
-                        </span>
-                        <div class="flip-card-word">{{ flashcards[0].word }}</div>
-                        <div class="flip-card-pronunciation">{{ flashcards[0].pronunciation or "No pronunciation available" }}</div>
-                        <div class="mt-auto">
-                            <div class="small text-light opacity-75">Click to reveal translations and examples</div>
-                        </div>
-                    </div>
-                    <div class="flip-card-back" id="cardBack">
-                        <div class="w-100">
-                            <h4 class="mb-3 text-primary">Translations</h4>
-                            <div class="flashcard-translations mb-4">
-                                {% if flashcards[0].translations %}
-                                    {% for translation in flashcards[0].translations.split(',') %}
-                                        <span class="translation-tag">{{ translation.strip() }}</span>
-                                    {% endfor %}
-                                {% else %}
-                                    <span class="translation-tag">No translations available</span>
-                                {% endif %}
-                            </div>
-                            
-                            <h4 class="mb-2 text-primary">Examples</h4>
-                            <div class="flashcard-examples">
-                                {% if flashcards[0].examples %}
-                                    {% for example in flashcards[0].examples.split('\n') %}
-                                        {% if example.strip() %}
-                                            <div class="example-item">{{ example.strip() }}</div>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="example-item">No examples available</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="text-center my-3">
-                <p>How well did you know this?</p>
-                <button class="difficulty-btn easy" onclick="markDifficulty('easy')">
-                    <i class="bi bi-emoji-smile"></i> Easy
-                </button>
-                <button class="difficulty-btn medium" onclick="markDifficulty('medium')">
-                    <i class="bi bi-emoji-neutral"></i> Medium
-                </button>
-                <button class="difficulty-btn hard" onclick="markDifficulty('hard')">
-                    <i class="bi bi-emoji-frown"></i> Hard
-                </button>
-            </div>
-
-            <div class="card mt-4 mb-4 bg-white">
-                <div class="card-body">
-                    <h5 class="card-title">Study Progress</h5>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: 0%" id="easyProgress">
-                            <span id="easyCount">0</span>
-                        </div>
-                    </div>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" id="mediumProgress">
-                            <span id="mediumCount">0</span>
-                        </div>
-                    </div>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" id="hardProgress">
-                            <span id="hardCount">0</span>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between small text-muted">
-                        <div>
-                            <i class="bi bi-emoji-smile text-success"></i> Easy: <span id="easyLabel">0</span>
-                        </div>
-                        <div>
-                            <i class="bi bi-emoji-neutral text-warning"></i> Medium: <span id="mediumLabel">0</span>
-                        </div>
-                        <div>
-                            <i class="bi bi-emoji-frown text-danger"></i> Hard: <span id="hardLabel">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-between mt-4">
-                <button class="btn btn-outline-secondary" id="prevBtn" disabled>
-                    <i class="bi bi-arrow-left"></i> Previous
-                </button>
-                <button class="btn btn-primary" id="nextBtn">
-                    Next <i class="bi bi-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const flashcards = {{ flashcards|tojson }};
-    let currentIndex = 0;
-    let progress = {
-        easy: 0,
-        medium: 0,
-        hard: 0
-    };
-    
-    const flashcardElement = document.getElementById('flashcardElement');
-    const cardFront = document.getElementById('cardFront');
-    const cardBack = document.getElementById('cardBack');
-    const currentCardElement = document.getElementById('currentCard');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    
-    if (flashcards.length === 0) {
-        return;
-    }
-    
-    // Flip card when clicked
-    if (flashcardElement) {
-        flashcardElement.addEventListener('click', function() {
-            flashcardElement.classList.toggle('flipped');
-        });
-    }
-    
-    // Handle navigation
-    if (prevBtn) {
-        prevBtn.addEventListener('click', function() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateCard();
-            }
-        });
-    }
-    
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
-            if (currentIndex < flashcards.length - 1) {
-                currentIndex++;
-                updateCard();
-            }
-        });
-    }
-    
-    // Mark difficulty function
-    window.markDifficulty = function(difficulty) {
-        progress[difficulty]++;
-        updateProgress();
-        
-        // Automatically go to next card if not the last one
-        if (currentIndex < flashcards.length - 1) {
-            setTimeout(() => {
-                currentIndex++;
-                updateCard();
-            }, 500);
-        }
-    };
-    
-    function updateCard() {
-        const flashcard = flashcards[currentIndex];
-        
-        // Make sure the card is showing the front side when changing cards
-        flashcardElement.classList.remove('flipped');
-        
-        // Update front of card
-        cardFront.querySelector('.flip-card-word').textContent = flashcard.word;
-        cardFront.querySelector('.flip-card-pronunciation').textContent = 
-            flashcard.pronunciation || "No pronunciation available";
-        
-        // Update back of card
-        const translationsContainer = cardBack.querySelector('.flashcard-translations');
-        translationsContainer.innerHTML = '';
-        
-        if (flashcard.translations) {
-            const translations = flashcard.translations.split(',');
-            translations.forEach(translation => {
-                if (translation.trim()) {
-                    const span = document.createElement('span');
-                    span.className = 'translation-tag';
-                    span.textContent = translation.trim();
-                    translationsContainer.appendChild(span);
-                }
-            });
-        } else {
-            const span = document.createElement('span');
-            span.className = 'translation-tag';
-            span.textContent = 'No translations available';
-            translationsContainer.appendChild(span);
-        }
-        
-        const examplesContainer = cardBack.querySelector('.flashcard-examples');
-        examplesContainer.innerHTML = '';
-        
-        if (flashcard.examples) {
-            const examples = flashcard.examples.split('\n');
-            examples.forEach(example => {
-                if (example.trim()) {
-                    const div = document.createElement('div');
-                    div.className = 'example-item';
-                    div.textContent = example.trim();
-                    examplesContainer.appendChild(div);
-                }
-            });
-        } else {
-            const div = document.createElement('div');
-            div.className = 'example-item';
-            div.textContent = 'No examples available';
-            examplesContainer.appendChild(div);
-        }
-        
-        // Update UI
-        currentCardElement.textContent = currentIndex + 1;
-        prevBtn.disabled = currentIndex === 0;
-        nextBtn.disabled = currentIndex === flashcards.length - 1;
-    }
-    
-    function updateProgress() {
-        const total = flashcards.length;
-        const easyPercent = (progress.easy / total * 100) || 0;
-        const mediumPercent = (progress.medium / total * 100) || 0;
-        const hardPercent = (progress.hard / total * 100) || 0;
-        
-        document.getElementById('easyProgress').style.width = `${easyPercent}%`;
-        document.getElementById('mediumProgress').style.width = `${mediumPercent}%`;
-        document.getElementById('hardProgress').style.width = `${hardPercent}%`;
-        
-        document.getElementById('easyCount').textContent = progress.easy;
-        document.getElementById('mediumCount').textContent = progress.medium;
-        document.getElementById('hardCount').textContent = progress.hard;
-        
-        document.getElementById('easyLabel').textContent = progress.easy;
-        document.getElementById('mediumLabel').textContent = progress.medium;
-        document.getElementById('hardLabel').textContent = progress.hard;
-    }
-    
-    // Initial setup
-    updateCard();
-    updateProgress();
-});
-</script>
 {% endblock %} 

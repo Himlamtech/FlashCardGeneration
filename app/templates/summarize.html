@@ -1,107 +1,146 @@
 {% extends "base.html" %}
 
-{% block title %}Summarize - FlashCard Generation{% endblock %}
+{% block title %}Text Summarizer - StudyWAI{% endblock %}
+
+{% block page_title %}Text Summarizer{% endblock %}
+{% block page_subtitle %}Generate concise summaries of articles, essays, or any long text.{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row mb-4 fade-in-element">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0"><i class="bi bi-file-text me-2"></i>Summarize Text</h2>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form id="summarize-form">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="text-input" class="form-label">Text to summarize:</label>
+                            <div>
+                                <button type="button" id="paste-url-btn" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-link me-1"></i> Paste URL
+                                </button>
+                                <button type="button" id="paste-text-btn" class="btn btn-sm btn-outline-secondary ms-2">
+                                    <i class="fas fa-paste me-1"></i> Paste Text
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="text-input" class="form-control" rows="10" placeholder="Enter or paste text to summarize..." required></textarea>
+                        <div class="text-muted small mt-1 text-end">
+                            <span id="char-count">0</span> / 10000 characters
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="summary-length" class="form-label">Summary Length:</label>
+                            <select id="summary-length" class="form-select">
+                                <option value="short">Short (1-2 paragraphs)</option>
+                                <option value="medium" selected>Medium (3-4 paragraphs)</option>
+                                <option value="long">Long (5+ paragraphs)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="summary-style" class="form-label">Summary Style:</label>
+                            <select id="summary-style" class="form-select">
+                                <option value="bullet">Bullet Points</option>
+                                <option value="paragraph" selected>Paragraphs</option>
+                                <option value="structured">Structured (Intro, Key Points, Conclusion)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" id="summarize-btn" class="btn btn-primary px-4">
+                            <i class="fas fa-compress-alt me-2"></i> Summarize Text
+                        </button>
+                        <button type="button" id="clear-btn" class="btn btn-light ms-2">
+                            <i class="fas fa-eraser me-2"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Results section -->
+        <div id="results-section" class="mt-4" style="display: none;">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2 text-primary"></i> Summary
+                    </h5>
+                    <div>
+                        <button id="copy-summary-btn" class="btn btn-sm btn-light">
+                            <i class="fas fa-copy me-1"></i> Copy
+                        </button>
+                        <button id="export-pdf-btn" class="btn btn-sm btn-light ms-1">
+                            <i class="fas fa-file-pdf me-1"></i> Export PDF
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="card-text">Our AI-powered summarization tool helps you condense lengthy text into concise summaries. Perfect for creating flashcards from long passages or articles.</p>
+                <div class="card-body p-4">
+                    <div id="summary-container" class="mb-4"></div>
                     
-                    <form id="summarizeForm" class="mt-4">
-                        <div class="mb-3">
-                            <label for="summarizeText" class="form-label">Enter text to summarize:</label>
-                            <textarea id="summarizeText" class="form-control" rows="8" placeholder="Paste your article, long text, or paragraphs here..."></textarea>
-                            <div class="form-text">For best results, provide well-structured text with clear paragraphs.</div>
-                        </div>
-                        <div class="row mb-3">
+                    <div class="mt-4">
+                        <h6 class="border-bottom pb-2 mb-3">Key Information</h6>
+                        <div class="row">
                             <div class="col-md-6">
-                                <label for="summaryLength" class="form-label">Summary Length:</label>
-                                <select id="summaryLength" class="form-select">
-                                    <option value="short">Short (1-2 sentences)</option>
-                                    <option value="medium" selected>Medium (3-5 sentences)</option>
-                                    <option value="long">Long (Multiple paragraphs)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="summaryStyle" class="form-label">Summary Style:</label>
-                                <select id="summaryStyle" class="form-select">
-                                    <option value="informative" selected>Informative (Factual)</option>
-                                    <option value="academic">Academic</option>
-                                    <option value="simplified">Simplified</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-primary">
-                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                <i class="bi bi-file-earmark-text me-1"></i> Summarize
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <div id="summarizeResult" class="mt-4 d-none">
-                        <div class="alert alert-success">
-                            <i class="bi bi-check-circle-fill me-2"></i>Summarization completed successfully!
-                        </div>
-                        <div class="card border-info">
-                            <div class="card-header bg-info bg-opacity-10">
-                                <h5 class="mb-0 text-info"><i class="bi bi-file-earmark-text me-2"></i>Summary</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="summarizedText" class="p-3 bg-light rounded"></div>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card bg-light mb-3">
-                                        <div class="card-body">
-                                            <h6 class="card-title"><i class="bi bi-lightbulb me-2"></i>Key Points</h6>
-                                            <ul id="keyPoints" class="mb-0">
-                                                <!-- Key points will be populated here -->
-                                            </ul>
-                                        </div>
-                                    </div>
+                                <div class="mb-3">
+                                    <label for="main-topics" class="form-label">Main Topics:</label>
+                                    <div id="main-topics" class="p-3 border rounded"></div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="card bg-light">
-                                        <div class="card-body">
-                                            <h6 class="card-title"><i class="bi bi-bar-chart me-2"></i>Stats</h6>
-                                            <div class="d-flex justify-content-between">
-                                                <span>Original Length:</span>
-                                                <span id="originalLength">0 words</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between">
-                                                <span>Summary Length:</span>
-                                                <span id="summaryLength">0 words</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between">
-                                                <span>Reduction:</span>
-                                                <span id="reductionPercentage">0%</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="key-terms" class="form-label">Key Terms:</label>
+                                    <div id="key-terms" class="p-3 border rounded"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                            <button type="button" class="btn btn-outline-primary" onclick="copyToClipboard('summarizedText')">
-                                <i class="bi bi-clipboard me-1"></i> Copy Summary
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="createFlashcardFromSummary()">
-                                <i class="bi bi-plus-circle me-1"></i> Create Flashcard
-                            </button>
-                        </div>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <button id="create-flashcards-btn" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i> Create Flashcards from Key Terms
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- URL Input Modal -->
+<div class="modal fade" id="url-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Extract Text from URL</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="url-input" class="form-label">Enter URL:</label>
+                    <input type="url" id="url-input" class="form-control" placeholder="https://example.com/article" required>
+                    <div class="form-text">
+                        Enter the URL of an article, blog post, or web page to extract its content.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="extract-url-btn" class="btn btn-primary">Extract Text</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75" style="display: none; z-index: 1050;">
+    <div class="text-center">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5 id="loading-message">Generating summary...</h5>
+        <p class="text-muted">This may take a few seconds</p>
     </div>
 </div>
 {% endblock %}
@@ -109,99 +148,336 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle summarize form submission
-        const summarizeForm = document.getElementById('summarizeForm');
-        if (summarizeForm) {
-            summarizeForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const text = document.getElementById('summarizeText').value;
+        // Elements
+        const form = document.getElementById('summarize-form');
+        const textInput = document.getElementById('text-input');
+        const charCount = document.getElementById('char-count');
+        const summaryLength = document.getElementById('summary-length');
+        const summaryStyle = document.getElementById('summary-style');
+        const summarizeBtn = document.getElementById('summarize-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const resultsSection = document.getElementById('results-section');
+        const summaryContainer = document.getElementById('summary-container');
+        const mainTopics = document.getElementById('main-topics');
+        const keyTerms = document.getElementById('key-terms');
+        const copySummaryBtn = document.getElementById('copy-summary-btn');
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        const createFlashcardsBtn = document.getElementById('create-flashcards-btn');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingMessage = document.getElementById('loading-message');
+        
+        // URL modal elements
+        const urlModal = new bootstrap.Modal(document.getElementById('url-modal'));
+        const urlInput = document.getElementById('url-input');
+        const extractUrlBtn = document.getElementById('extract-url-btn');
+        const pasteUrlBtn = document.getElementById('paste-url-btn');
+        
+        // Update character count
+        textInput.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = count;
+            
+            // Warn if approaching limit
+            if (count > 9000) {
+                charCount.classList.add('text-danger');
+            } else {
+                charCount.classList.remove('text-danger');
+            }
+            
+            // Limit input
+            if (count > 10000) {
+                this.value = this.value.substring(0, 10000);
+                charCount.textContent = 10000;
+            }
+        });
+        
+        // Clear button
+        clearBtn.addEventListener('click', function() {
+            textInput.value = '';
+            charCount.textContent = '0';
+            charCount.classList.remove('text-danger');
+            resultsSection.style.display = 'none';
+        });
+        
+        // Paste URL button
+        pasteUrlBtn.addEventListener('click', function() {
+            urlModal.show();
+        });
+        
+        // Paste Text button
+        document.getElementById('paste-text-btn').addEventListener('click', async function() {
+            try {
+                const text = await navigator.clipboard.readText();
+                textInput.value = text;
+                charCount.textContent = text.length;
                 
-                if (!text) {
-                    alert('Please enter some text to summarize.');
-                    return;
+                // Warn if approaching limit
+                if (text.length > 9000) {
+                    charCount.classList.add('text-danger');
                 }
                 
-                const spinner = this.querySelector('.spinner-border');
-                const submitBtn = this.querySelector('button[type="submit"]');
+                // Limit input
+                if (text.length > 10000) {
+                    textInput.value = text.substring(0, 10000);
+                    charCount.textContent = 10000;
+                }
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+                // Fallback for browsers without clipboard API
+                textInput.focus();
+                document.execCommand('paste');
+                charCount.textContent = textInput.value.length;
+            }
+        });
+        
+        // Extract URL button
+        extractUrlBtn.addEventListener('click', async function() {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                urlInput.focus();
+                return;
+            }
+            
+            try {
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Extracting...';
                 
-                spinner.classList.remove('d-none');
-                submitBtn.disabled = true;
+                loadingMessage.textContent = 'Extracting content from URL...';
+                loadingOverlay.style.display = 'flex';
                 
-                // Calculate original text stats
-                const originalWordCount = text.split(/\s+/).filter(word => word.length > 0).length;
-                
-                fetch('/api/summarize', {
+                const response = await fetch('/api/extract-url', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ 
-                        text: text,
-                        length: document.getElementById('summaryLength').value,
-                        style: document.getElementById('summaryStyle').value
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Display summary
-                    document.getElementById('summarizedText').textContent = data.summary;
-                    
-                    // Calculate summary stats
-                    const summaryWordCount = data.summary.split(/\s+/).filter(word => word.length > 0).length;
-                    const reductionPercentage = Math.round((1 - (summaryWordCount / originalWordCount)) * 100);
-                    
-                    document.getElementById('originalLength').textContent = `${originalWordCount} words`;
-                    document.getElementById('summaryLength').textContent = `${summaryWordCount} words`;
-                    document.getElementById('reductionPercentage').textContent = `${reductionPercentage}%`;
-                    
-                    // Extract key points (this is simplified - in a real app, you might get these from the API)
-                    const keyPointsContainer = document.getElementById('keyPoints');
-                    keyPointsContainer.innerHTML = '';
-                    
-                    // Simple key point extraction by sentences
-                    const sentences = data.summary.match(/[^\.!\?]+[\.!\?]+/g) || [];
-                    const keyPoints = sentences.slice(0, Math.min(sentences.length, 3));
-                    
-                    keyPoints.forEach(point => {
-                        const li = document.createElement('li');
-                        li.textContent = point.trim();
-                        keyPointsContainer.appendChild(li);
-                    });
-                    
-                    // Show the result section
-                    document.getElementById('summarizeResult').classList.remove('d-none');
-                    document.getElementById('summarizeResult').scrollIntoView({ behavior: 'smooth' });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                })
-                .finally(() => {
-                    spinner.classList.add('d-none');
-                    submitBtn.disabled = false;
+                    body: JSON.stringify({ url: url }),
                 });
-            });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Update text input
+                textInput.value = data.content;
+                charCount.textContent = data.content.length;
+                
+                // Close modal
+                urlModal.hide();
+                
+            } catch (error) {
+                console.error('URL extraction error:', error);
+                
+                // Show error message
+                alert(`Error: ${error.message || 'Failed to extract content from URL. Please try again.'}`);
+                
+            } finally {
+                // Reset button
+                this.disabled = false;
+                this.innerHTML = 'Extract Text';
+                
+                // Hide loading overlay
+                loadingOverlay.style.display = 'none';
+            }
+        });
+        
+        // Form submission
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Validate
+            if (!textInput.value.trim()) {
+                textInput.focus();
+                return;
+            }
+            
+            // Show loading overlay
+            loadingMessage.textContent = 'Generating summary...';
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                const response = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: textInput.value,
+                        length: summaryLength.value,
+                        style: summaryStyle.value
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Update summary
+                updateSummary(data);
+                
+                // Show results section
+                resultsSection.style.display = 'block';
+                
+                // Scroll to results
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+            } catch (error) {
+                console.error('Summarization error:', error);
+                
+                // Show error message
+                alert(`Error: ${error.message || 'Failed to generate summary. Please try again.'}`);
+                
+            } finally {
+                // Hide loading overlay
+                loadingOverlay.style.display = 'none';
+            }
+        });
+        
+        // Copy summary
+        copySummaryBtn.addEventListener('click', async function() {
+            try {
+                await navigator.clipboard.writeText(summaryContainer.innerText);
+                
+                // Show feedback
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                
+                // Fallback
+                const range = document.createRange();
+                range.selectNode(summaryContainer);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges();
+            }
+        });
+        
+        // Export PDF
+        exportPdfBtn.addEventListener('click', function() {
+            // This would normally use a library like jsPDF
+            // For demonstration, we'll show an alert
+            alert('PDF export functionality would be implemented with a library like jsPDF.');
+            
+            // Example implementation with jsPDF would be:
+            /*
+            const doc = new jsPDF();
+            doc.setFontSize(16);
+            doc.text('Summary', 20, 20);
+            doc.setFontSize(12);
+            doc.text(summaryContainer.innerText, 20, 30);
+            doc.save('summary.pdf');
+            */
+        });
+        
+        // Create flashcards
+        createFlashcardsBtn.addEventListener('click', function() {
+            // Navigate to flashcard creation with terms
+            const terms = document.querySelectorAll('#key-terms .badge');
+            if (terms.length > 0) {
+                const termsList = Array.from(terms).map(term => term.textContent).join(',');
+                window.location.href = `/create?terms=${encodeURIComponent(termsList)}`;
+            }
+        });
+        
+        // Update summary display
+        function updateSummary(data) {
+            // Update summary content
+            if (data.style === 'bullet') {
+                // Bullet point style
+                const bulletList = document.createElement('ul');
+                bulletList.className = 'mb-0';
+                
+                data.summary.split('\n').filter(Boolean).forEach(point => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'mb-2';
+                    listItem.textContent = point.replace(/^[\s•-]+/, '').trim();
+                    bulletList.appendChild(listItem);
+                });
+                
+                summaryContainer.innerHTML = '';
+                summaryContainer.appendChild(bulletList);
+                
+            } else if (data.style === 'structured') {
+                // Structured style (sections)
+                const sections = ['Introduction', 'Key Points', 'Conclusion'];
+                const paragraphs = data.summary.split('\n\n');
+                
+                summaryContainer.innerHTML = '';
+                
+                // Create each section
+                paragraphs.forEach((paragraph, index) => {
+                    if (paragraph.trim()) {
+                        const section = document.createElement('div');
+                        section.className = 'mb-3';
+                        
+                        if (index < sections.length) {
+                            const heading = document.createElement('h6');
+                            heading.className = 'mb-2';
+                            heading.textContent = sections[index];
+                            section.appendChild(heading);
+                        }
+                        
+                        const content = document.createElement('p');
+                        content.className = 'mb-0';
+                        content.textContent = paragraph.trim();
+                        section.appendChild(content);
+                        
+                        summaryContainer.appendChild(section);
+                    }
+                });
+                
+            } else {
+                // Paragraph style (default)
+                summaryContainer.innerHTML = '';
+                
+                data.summary.split('\n\n').forEach(paragraph => {
+                    if (paragraph.trim()) {
+                        const p = document.createElement('p');
+                        p.textContent = paragraph.trim();
+                        summaryContainer.appendChild(p);
+                    }
+                });
+            }
+            
+            // Update main topics
+            mainTopics.innerHTML = '';
+            
+            if (data.topics && data.topics.length > 0) {
+                data.topics.forEach(topic => {
+                    const topicElement = document.createElement('div');
+                    topicElement.className = 'mb-2';
+                    topicElement.innerHTML = `<i class="fas fa-circle me-2 text-primary small"></i> ${topic}`;
+                    mainTopics.appendChild(topicElement);
+                });
+            } else {
+                mainTopics.innerHTML = '<div class="text-muted">No main topics identified.</div>';
+            }
+            
+            // Update key terms
+            keyTerms.innerHTML = '';
+            
+            if (data.terms && data.terms.length > 0) {
+                data.terms.forEach(term => {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-light text-dark me-2 mb-2 px-3 py-2';
+                    badge.textContent = term;
+                    keyTerms.appendChild(badge);
+                });
+            } else {
+                keyTerms.innerHTML = '<div class="text-muted">No key terms identified.</div>';
+            }
         }
     });
-    
-    // Copy text to clipboard
-    function copyToClipboard(elementId) {
-        const text = document.getElementById(elementId).textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Text copied to clipboard!');
-        });
-    }
-    
-    // Create flashcard from summary
-    function createFlashcardFromSummary() {
-        const originalText = document.getElementById('summarizeText').value;
-        const summary = document.getElementById('summarizedText').textContent;
-        
-        // Create a title from the first few words of the original text
-        const titleWords = originalText.split(/\s+/).slice(0, 5).join(' ');
-        const title = titleWords + (originalText.length > titleWords.length ? '...' : '');
-        
-        window.location.href = `/create?question=${encodeURIComponent(title)}&answer=${encodeURIComponent(summary)}&tags=summary`;
-    }
 </script>
 {% endblock %} 

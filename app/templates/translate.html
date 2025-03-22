@@ -1,87 +1,174 @@
 {% extends "base.html" %}
 
-{% block title %}Translation - FlashCard Generation{% endblock %}
+{% block title %}Translation Tool - StudyWAI{% endblock %}
+
+{% block page_title %}Translation Tool{% endblock %}
+{% block page_subtitle %}Translate text between multiple languages using AI.{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row mb-4 fade-in-element">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0"><i class="bi bi-translate me-2"></i>Translation</h2>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">Translate text between different languages using our AI-powered translation tool. Perfect for creating flashcards for language learning!</p>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="source-lang" class="form-label">Source Language:</label>
+                            <select id="source-lang" class="form-select">
+                                <option value="auto">Auto Detect</option>
+                                <option value="english">English</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="french">French</option>
+                                <option value="german">German</option>
+                                <option value="italian">Italian</option>
+                                <option value="portuguese">Portuguese</option>
+                                <option value="russian">Russian</option>
+                                <option value="japanese">Japanese</option>
+                                <option value="korean">Korean</option>
+                                <option value="chinese">Chinese</option>
+                                <option value="arabic">Arabic</option>
+                                <option value="hindi">Hindi</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="source-text" class="form-label">Text to Translate:</label>
+                            <div class="position-relative">
+                                <textarea id="source-text" class="form-control" rows="10" placeholder="Enter text to translate..."></textarea>
+                                <button id="clear-source" class="btn btn-sm position-absolute top-0 end-0 mt-1 me-1 text-secondary">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <button id="paste-source" class="btn btn-sm btn-light">
+                                        <i class="fas fa-paste me-1"></i> Paste
+                                    </button>
+                                    <div class="text-muted small">
+                                        <span id="source-char-count">0</span> characters
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <form id="translateForm" class="mt-4">
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label for="translateText" class="form-label">Enter text to translate:</label>
-                                <textarea id="translateText" class="form-control" rows="5" placeholder="Enter your text here..."></textarea>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="sourceLanguage" class="form-label">Source Language:</label>
-                                <select id="sourceLanguage" class="form-select mb-3">
-                                    <option value="auto" selected>Auto-detect</option>
-                                    <option value="en">English</option>
-                                    <option value="fr">French</option>
-                                    <option value="es">Spanish</option>
-                                    <option value="de">German</option>
-                                    <option value="it">Italian</option>
-                                    <option value="ja">Japanese</option>
-                                    <option value="zh">Chinese</option>
-                                    <option value="ru">Russian</option>
-                                    <option value="ar">Arabic</option>
-                                    <option value="hi">Hindi</option>
-                                    <option value="pt">Portuguese</option>
-                                </select>
-                                
-                                <label for="targetLanguage" class="form-label">Target Language:</label>
-                                <select id="targetLanguage" class="form-select">
-                                    <option value="en">English</option>
-                                    <option value="fr" selected>French</option>
-                                    <option value="es">Spanish</option>
-                                    <option value="de">German</option>
-                                    <option value="it">Italian</option>
-                                    <option value="ja">Japanese</option>
-                                    <option value="zh">Chinese</option>
-                                    <option value="ru">Russian</option>
-                                    <option value="ar">Arabic</option>
-                                    <option value="hi">Hindi</option>
-                                    <option value="pt">Portuguese</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-primary">
-                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                <i class="bi bi-translate me-1"></i> Translate
-                            </button>
-                        </div>
-                    </form>
+                    <div class="col-md-2 d-flex align-items-center justify-content-center my-3">
+                        <button id="swap-languages" class="btn btn-light rounded-circle p-2">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </div>
                     
-                    <div id="translateResult" class="mt-4 d-none">
-                        <div class="alert alert-success">
-                            <i class="bi bi-check-circle-fill me-2"></i>Translation completed successfully!
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="target-lang" class="form-label">Target Language:</label>
+                            <select id="target-lang" class="form-select">
+                                <option value="english">English</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="french">French</option>
+                                <option value="german">German</option>
+                                <option value="italian">Italian</option>
+                                <option value="portuguese">Portuguese</option>
+                                <option value="russian">Russian</option>
+                                <option value="japanese">Japanese</option>
+                                <option value="korean">Korean</option>
+                                <option value="chinese">Chinese</option>
+                                <option value="arabic">Arabic</option>
+                                <option value="hindi">Hindi</option>
+                            </select>
                         </div>
-                        <div class="card border-primary">
-                            <div class="card-header bg-primary bg-opacity-10">
-                                <h5 class="mb-0 text-primary"><i class="bi bi-translate me-2"></i>Translation</h5>
+                        
+                        <div class="mb-3">
+                            <label for="target-text" class="form-label">Translation:</label>
+                            <div class="position-relative">
+                                <textarea id="target-text" class="form-control" rows="10" placeholder="Translation will appear here..." readonly></textarea>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <button id="copy-translation" class="btn btn-sm btn-light">
+                                        <i class="fas fa-copy me-1"></i> Copy
+                                    </button>
+                                    <button id="save-flashcard" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus me-1"></i> Create Flashcard
+                                    </button>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div id="translatedText" class="p-3 bg-light rounded"></div>
-                            </div>
-                        </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                            <button type="button" class="btn btn-outline-primary" onclick="copyToClipboard('translatedText')">
-                                <i class="bi bi-clipboard me-1"></i> Copy to Clipboard
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="createFlashcardFromTranslation()">
-                                <i class="bi bi-plus-circle me-1"></i> Create Flashcard
-                            </button>
                         </div>
                     </div>
                 </div>
+                
+                <div class="row mt-2">
+                    <div class="col-12 text-center">
+                        <button id="translate-btn" class="btn btn-primary px-4">
+                            <i class="fas fa-language me-2"></i> Translate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Translation History -->
+        <div class="card mt-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Translation History</h5>
+                <button id="clear-history" class="btn btn-sm btn-light">
+                    <i class="fas fa-trash-alt me-1"></i> Clear History
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="translation-history">
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-history fa-2x mb-2"></i>
+                        <p>Your translation history will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Flashcard Modal -->
+<div class="modal fade" id="create-flashcard-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Flashcard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="flashcard-form">
+                    <div class="mb-3">
+                        <label for="flashcard-word" class="form-label">Word or Phrase:</label>
+                        <input type="text" id="flashcard-word" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="flashcard-language" class="form-label">Language:</label>
+                        <select id="flashcard-language" class="form-select" required>
+                            <option value="english">English</option>
+                            <option value="spanish">Spanish</option>
+                            <option value="french">French</option>
+                            <option value="german">German</option>
+                            <option value="italian">Italian</option>
+                            <option value="portuguese">Portuguese</option>
+                            <option value="russian">Russian</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="korean">Korean</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="arabic">Arabic</option>
+                            <option value="hindi">Hindi</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="flashcard-translation" class="form-label">Translation:</label>
+                        <input type="text" id="flashcard-translation" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="flashcard-example" class="form-label">Example:</label>
+                        <textarea id="flashcard-example" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="save-flashcard-btn" class="btn btn-primary">Create Flashcard</button>
             </div>
         </div>
     </div>
@@ -91,73 +178,295 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle translation form submission
-        const translateForm = document.getElementById('translateForm');
-        if (translateForm) {
-            translateForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const text = document.getElementById('translateText').value;
-                const targetLang = document.getElementById('targetLanguage').value;
+        // Elements
+        const sourceText = document.getElementById('source-text');
+        const targetText = document.getElementById('target-text');
+        const sourceLang = document.getElementById('source-lang');
+        const targetLang = document.getElementById('target-lang');
+        const translateBtn = document.getElementById('translate-btn');
+        const clearSourceBtn = document.getElementById('clear-source');
+        const pasteSourceBtn = document.getElementById('paste-source');
+        const copyTranslationBtn = document.getElementById('copy-translation');
+        const swapLanguagesBtn = document.getElementById('swap-languages');
+        const saveFlashcardBtn = document.getElementById('save-flashcard');
+        const clearHistoryBtn = document.getElementById('clear-history');
+        const sourceCharCount = document.getElementById('source-char-count');
+        const translationHistory = document.getElementById('translation-history');
+        
+        // Modal elements
+        const flashcardModal = new bootstrap.Modal(document.getElementById('create-flashcard-modal'));
+        const flashcardWordInput = document.getElementById('flashcard-word');
+        const flashcardLanguageSelect = document.getElementById('flashcard-language');
+        const flashcardTranslationInput = document.getElementById('flashcard-translation');
+        const flashcardExampleInput = document.getElementById('flashcard-example');
+        const saveFlashcardModalBtn = document.getElementById('save-flashcard-btn');
+        
+        // Update character count
+        sourceText.addEventListener('input', function() {
+            sourceCharCount.textContent = this.value.length;
+        });
+        
+        // Clear source text
+        clearSourceBtn.addEventListener('click', function() {
+            sourceText.value = '';
+            sourceCharCount.textContent = '0';
+        });
+        
+        // Paste from clipboard
+        pasteSourceBtn.addEventListener('click', async function() {
+            try {
+                const text = await navigator.clipboard.readText();
+                sourceText.value = text;
+                sourceCharCount.textContent = text.length;
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+                // Fallback for browsers without clipboard API
+                sourceText.focus();
+                document.execCommand('paste');
+                sourceCharCount.textContent = sourceText.value.length;
+            }
+        });
+        
+        // Copy translation
+        copyTranslationBtn.addEventListener('click', async function() {
+            if (!targetText.value) return;
+            
+            try {
+                await navigator.clipboard.writeText(targetText.value);
                 
-                if (!text) {
-                    alert('Please enter some text to translate.');
-                    return;
-                }
+                // Show feedback
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
                 
-                const spinner = this.querySelector('.spinner-border');
-                const submitBtn = this.querySelector('button[type="submit"]');
-                
-                spinner.classList.remove('d-none');
-                submitBtn.disabled = true;
-                
-                fetch('/api/translate', {
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                // Fallback
+                targetText.select();
+                document.execCommand('copy');
+            }
+        });
+        
+        // Swap languages
+        swapLanguagesBtn.addEventListener('click', function() {
+            if (sourceLang.value === 'auto') return;
+            
+            const tempLang = sourceLang.value;
+            sourceLang.value = targetLang.value;
+            targetLang.value = tempLang;
+            
+            const tempText = sourceText.value;
+            sourceText.value = targetText.value;
+            targetText.value = tempText;
+            
+            sourceCharCount.textContent = sourceText.value.length;
+        });
+        
+        // Translate
+        translateBtn.addEventListener('click', async function() {
+            if (!sourceText.value.trim()) return;
+            
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Translating...';
+            
+            try {
+                const response = await fetch('/api/translate', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ 
-                        text: text, 
-                        target_language: targetLang 
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('translatedText').textContent = data.translated_text;
-                    document.getElementById('translateResult').classList.remove('d-none');
-                    document.getElementById('translateResult').scrollIntoView({ behavior: 'smooth' });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                })
-                .finally(() => {
-                    spinner.classList.add('d-none');
-                    submitBtn.disabled = false;
+                    body: JSON.stringify({
+                        text: sourceText.value,
+                        source_lang: sourceLang.value,
+                        target_lang: targetLang.value
+                    }),
                 });
-            });
-        }
-    });
-    
-    // Copy text to clipboard
-    function copyToClipboard(elementId) {
-        const text = document.getElementById(elementId).textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Text copied to clipboard!');
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Update translation
+                targetText.value = data.translated_text;
+                
+                // Add to history
+                addToHistory(sourceText.value, data.translated_text, sourceLang.value, targetLang.value);
+                
+            } catch (error) {
+                console.error('Translation error:', error);
+                
+                // Show error message
+                targetText.value = `Error: ${error.message || 'Failed to translate text. Please try again.'}`;
+            } finally {
+                // Restore button
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-language me-2"></i> Translate';
+            }
         });
-    }
-    
-    // Create flashcard from translated text
-    function createFlashcardFromTranslation() {
-        const originalText = document.getElementById('translateText').value;
-        const translatedText = document.getElementById('translatedText').textContent;
-        const sourceLang = document.getElementById('sourceLanguage').value;
-        const targetLang = document.getElementById('targetLanguage').value;
         
-        // Creating a flashcard with the original text as the question and the translation as the answer
-        const sourceText = sourceLang === 'auto' ? 'Original' : document.getElementById('sourceLanguage').options[document.getElementById('sourceLanguage').selectedIndex].text;
-        const targetText = document.getElementById('targetLanguage').options[document.getElementById('targetLanguage').selectedIndex].text;
+        // Create flashcard
+        saveFlashcardBtn.addEventListener('click', function() {
+            flashcardWordInput.value = sourceText.value.length > 50 ? sourceText.value.substring(0, 50) + '...' : sourceText.value;
+            flashcardLanguageSelect.value = sourceLang.value === 'auto' ? 'english' : sourceLang.value;
+            flashcardTranslationInput.value = targetText.value;
+            
+            flashcardModal.show();
+        });
         
-        window.location.href = `/create?question=${encodeURIComponent(originalText)}&answer=${encodeURIComponent(translatedText)}&tags=${encodeURIComponent(`translation,${targetText}`)}`;
-    }
+        // Save flashcard from modal
+        saveFlashcardModalBtn.addEventListener('click', async function() {
+            const form = document.getElementById('flashcard-form');
+            
+            // Basic validation
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Saving...';
+            
+            try {
+                const response = await fetch('/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'word': flashcardWordInput.value,
+                        'language': flashcardLanguageSelect.value,
+                        'translations': flashcardTranslationInput.value,
+                        'examples': flashcardExampleInput.value
+                    }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create flashcard');
+                }
+                
+                // Show success message
+                const successMessage = document.createElement('div');
+                successMessage.className = 'flash-message flash-success';
+                successMessage.textContent = 'Flashcard created successfully!';
+                document.querySelector('.content-wrapper').prepend(successMessage);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    successMessage.remove();
+                }, 5000);
+                
+                // Close modal
+                flashcardModal.hide();
+                
+            } catch (error) {
+                console.error('Flashcard creation error:', error);
+                
+                // Show error message
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'flash-message flash-error';
+                errorMessage.textContent = 'Failed to create flashcard. Please try again.';
+                document.querySelector('.content-wrapper').prepend(errorMessage);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    errorMessage.remove();
+                }, 5000);
+                
+            } finally {
+                // Restore button
+                this.disabled = false;
+                this.innerHTML = 'Create Flashcard';
+            }
+        });
+        
+        // Add to translation history
+        function addToHistory(sourceText, translatedText, sourceLang, targetLang) {
+            // Remove "no history" message if present
+            const noHistory = translationHistory.querySelector('.text-center.py-4');
+            if (noHistory) {
+                noHistory.remove();
+            }
+            
+            // Create history item
+            const historyItem = document.createElement('div');
+            historyItem.className = 'card mb-3 border-0 shadow-sm fade-in-element';
+            
+            // Format languages for display
+            const sourceDisplay = sourceLang === 'auto' ? 'Auto Detected' : sourceLang.charAt(0).toUpperCase() + sourceLang.slice(1);
+            const targetDisplay = targetLang.charAt(0).toUpperCase() + targetLang.slice(1);
+            
+            historyItem.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="badge bg-light text-dark">
+                            <i class="fas fa-exchange-alt mx-1"></i>
+                            ${sourceDisplay} → ${targetDisplay}
+                        </div>
+                        <div class="text-muted small">Just now</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2 mb-md-0">
+                            <div class="small text-muted mb-1">Original:</div>
+                            <div>${sourceText.length > 100 ? sourceText.substring(0, 100) + '...' : sourceText}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="small text-muted mb-1">Translation:</div>
+                            <div>${translatedText.length > 100 ? translatedText.substring(0, 100) + '...' : translatedText}</div>
+                        </div>
+                    </div>
+                    <div class="mt-2 d-flex justify-content-end">
+                        <button class="btn btn-sm btn-light me-2 restore-translation">
+                            <i class="fas fa-sync-alt me-1"></i> Restore
+                        </button>
+                        <button class="btn btn-sm btn-light delete-history">
+                            <i class="fas fa-times me-1"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners to the history item
+            historyItem.querySelector('.restore-translation').addEventListener('click', function() {
+                sourceText.value = sourceText;
+                targetText.value = translatedText;
+                sourceLang.value = sourceLang;
+                targetLang.value = targetLang;
+                sourceCharCount.textContent = sourceText.length;
+            });
+            
+            historyItem.querySelector('.delete-history').addEventListener('click', function() {
+                historyItem.remove();
+                
+                // Show "no history" message if no items left
+                if (translationHistory.children.length === 0) {
+                    translationHistory.innerHTML = `
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-history fa-2x mb-2"></i>
+                            <p>Your translation history will appear here.</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Add to history container
+            translationHistory.prepend(historyItem);
+        }
+        
+        // Clear history
+        clearHistoryBtn.addEventListener('click', function() {
+            translationHistory.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-history fa-2x mb-2"></i>
+                    <p>Your translation history will appear here.</p>
+                </div>
+            `;
+        });
+    });
 </script>
 {% endblock %} 
