@@ -7,7 +7,9 @@ from src.flashcards.models.schemas import (
     SummarizeRequest,
     GrammarResponse,
     TranslationResponse,
-    SummaryResponse
+    SummaryResponse,
+    ChatRequest,
+    ChatResponse
 )
 from src.flashcards.ai import gemini
 from src.flashcards.database import csv_db
@@ -22,11 +24,8 @@ async def check_grammar(request: TextRequest):
         raise HTTPException(status_code=400, detail="No text provided")
     
     try:
+        # The gemini.check_grammar function now handles database logging internally
         result = await gemini.check_grammar(request.text)
-        
-        # Save to grammar history database
-        csv_db.save_grammar_history(request.text, result.get("corrected_text", ""))
-        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -41,17 +40,10 @@ async def translate(request: TranslationRequest):
         source_lang = request.source_lang or "auto"
         target_lang = request.target_lang or "en"
         
+        # The gemini.translate function now handles database logging internally
         result = await gemini.translate(
             request.text, 
             source_lang, 
-            target_lang
-        )
-        
-        # Save to translation history database
-        csv_db.save_translation_history(
-            request.text,
-            result.get("translated_text", ""),
-            source_lang,
             target_lang
         )
         
@@ -69,20 +61,39 @@ async def summarize(request: SummarizeRequest):
         length = request.length or "medium"
         style = request.style or "informative"
         
+        # The gemini.summarize function now handles database logging internally
         result = await gemini.summarize(
             request.text,
             length,
             style
         )
         
-        # Save to summarize history database
-        csv_db.save_summarize_history(
-            request.text,
-            result.get("summary", ""),
-            length,
-            style
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """Chat with AI assistant"""
+    if not request.message:
+        raise HTTPException(status_code=400, detail="No message provided")
+    
+    try:
+        # The chat_with_ai function handles database logging internally
+        response = await gemini.chat_with_ai(
+            request.message,
+            request.context
         )
         
-        return result
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/history/{feature}")
+async def get_history(feature: str, limit: int = 10):
+    """Get history of interactions for a specific feature"""
+    try:
+        history = csv_db.get_query_log(feature, limit)
+        return {"history": history}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 

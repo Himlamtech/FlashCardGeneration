@@ -17,6 +17,11 @@ class SummarizeRequest(BaseModel):
     length: Optional[str] = None  # short, medium, long
     style: Optional[str] = None   # informative, academic, simplified
 
+class ChatRequest(BaseModel):
+    """Request model for chat with AI assistant"""
+    message: str
+    context: Optional[str] = None
+
 class FlashcardCreate(BaseModel):
     """Model for flashcard creation"""
     word: str
@@ -52,4 +57,20 @@ class TranslationResponse(BaseModel):
 
 class SummaryResponse(BaseModel):
     """Response model for text summarization"""
-    summary: str 
+    summary: str
+
+class ChatResponse(BaseModel):
+    """Response model for chat with AI assistant"""
+    response: str
+
+class QueryLogEntry(BaseModel):
+    """Model for a query log entry"""
+    id: int
+    feature: str
+    query: str
+    response: str
+    created_at: str
+
+class QueryLogResponse(BaseModel):
+    """Response model for query log"""
+    history: List[QueryLogEntry] 

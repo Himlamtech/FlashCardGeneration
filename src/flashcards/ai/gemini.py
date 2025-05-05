@@ -3,13 +3,21 @@ import json
 import re
 import google.generativeai as genai
 from dotenv import load_dotenv
+from src.flashcards.database import csv_db
 
 # Load environment variables
 load_dotenv()
 
 # Initialize Gemini API
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-2.0-flash-lite-001')
+gemini_api_key = os.getenv('GEMINI_API_KEY')
+if not gemini_api_key:
+    gemini_api_key = os.getenv('GOOGLE_AI_API_KEY')  # Try alternative name
+    
+if not gemini_api_key:
+    raise ValueError("No Gemini API key found. Please set GEMINI_API_KEY or GOOGLE_AI_API_KEY in .env file")
+
+genai.configure(api_key=gemini_api_key)
+model = genai.GenerativeModel('gemini-pro')  # Updated to use latest model
 
 async def generate_flashcard_data(word, language):
     """
@@ -29,11 +37,10 @@ async def generate_flashcard_data(word, language):
     """
     
     response = model.generate_content(prompt)
+    response_text = response.text
     
     # Process response to extract the JSON
     try:
-        response_text = response.text
-        
         # Try to parse as JSON directly
         try:
             data = json.loads(response_text)
@@ -68,6 +75,11 @@ async def generate_flashcard_data(word, language):
             "pronunciation": "Error retrieving pronunciation",
             "examples": "Error retrieving examples"
         }
+    
+    # Log the query and response
+    query = f"Generate flashcard for '{word}' in {language}"
+    response_str = json.dumps(data)
+    csv_db.save_query_log("flashcard_generation", query, response_str)
         
     return data
 
@@ -90,10 +102,9 @@ async def check_grammar(text):
     """
     
     response = model.generate_content(prompt)
+    response_text = response.text
     
     try:
-        response_text = response.text
-        
         # Try to parse as JSON directly
         try:
             data = json.loads(response_text)
@@ -122,6 +133,9 @@ async def check_grammar(text):
             "corrected_text": text,
             "errors": f"Error analyzing text: {str(e)}"
         }
+    
+    # Save to grammar history database and log
+    csv_db.save_grammar_history(text, data.get("corrected_text", ""))
         
     return data
 
@@ -143,10 +157,9 @@ async def translate(text, source_lang, target_lang):
     """
     
     response = model.generate_content(prompt)
+    response_text = response.text
     
     try:
-        response_text = response.text
-        
         # Try to parse as JSON directly
         try:
             data = json.loads(response_text)
@@ -171,6 +184,14 @@ async def translate(text, source_lang, target_lang):
         data = {
             "translated_text": f"Error translating text: {str(e)}"
         }
+    
+    # Save to translation history database
+    csv_db.save_translation_history(
+        text, 
+        data.get("translated_text", ""), 
+        source_lang, 
+        target_lang
+    )
         
     return data
 
@@ -214,10 +235,9 @@ async def summarize(text, length=None, style=None):
     """
     
     response = model.generate_content(prompt)
+    response_text = response.text
     
     try:
-        response_text = response.text
-        
         # Try to parse as JSON directly
         try:
             data = json.loads(response_text)
@@ -242,5 +262,39 @@ async def summarize(text, length=None, style=None):
         data = {
             "summary": f"Error summarizing text: {str(e)}"
         }
+    
+    # Save to summarize history database
+    csv_db.save_summarize_history(
+        text,
+        data.get("summary", ""),
+        length or "medium",
+        style or "informative"
+    )
         
-    return data 
+    return data
+
+async def chat_with_ai(message, context=None):
+    """
+    Chat with the AI assistant
+    
+    Args:
+        message (str): User message
+        context (str, optional): Additional context
+    """
+    prompt = f"""
+    You are an AI language learning assistant for the StudyWAI flashcard application.
+    
+    {context or ""}
+    
+    User: {message}
+    
+    Response:
+    """
+    
+    response = model.generate_content(prompt)
+    response_text = response.text
+    
+    # Log the chat conversation
+    csv_db.save_chat_history(message, response_text)
+    
+    return response_text 

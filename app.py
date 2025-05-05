@@ -18,7 +18,7 @@ from src.flashcards.ai import gemini
 from src.flashcards.utils.template_helper import get_common_context
 
 # Initialize FastAPI app
-app = FastAPI(title="Flash Card Generation using AI")
+app = FastAPI(title="StudyWAI - AI-Powered Flashcard Application")
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -241,59 +241,56 @@ async def chatbot(request: Request):
     """Chatbot Assistant page"""
     context = get_common_context()
     context["nav_info"]["current_path"] = "/chatbot"
+    
+    # Get recent chat history
+    context["chat_history"] = csv_db.get_chat_history(5)
+    
     return templates.TemplateResponse("chatbot.html", {"request": request, **context})
+
+@app.post("/api/chat")
+async def api_chat(request: Request):
+    """API endpoint for chatbot interaction"""
+    try:
+        data = await request.json()
+        message = data.get("message", "")
+        context = data.get("context", "")
+        
+        if not message:
+            return JSONResponse(
+                content={"error": "No message provided"}, 
+                status_code=400
+            )
+        
+        # Use the chat_with_ai function from gemini
+        response = await gemini.chat_with_ai(message, context)
+        
+        return JSONResponse(content={"response": response})
+    except Exception as e:
+        logger.error(f"Error in chat API: {str(e)}")
+        return JSONResponse(
+            content={"error": f"Failed to process request: {str(e)}"}, 
+            status_code=500
+        )
+
+@app.get("/api/history/{feature}")
+async def api_history(feature: str, limit: int = 10):
+    """Get history of interactions for a specific feature"""
+    try:
+        history = csv_db.get_query_log(feature, limit)
+        return JSONResponse(content={"history": history})
+    except Exception as e:
+        logger.error(f"Error getting history: {str(e)}")
+        return JSONResponse(
+            content={"error": f"Failed to retrieve history: {str(e)}"}, 
+            status_code=500
+        )
 
 @app.get("/healthcheck")
 async def healthcheck():
     """Simple health check endpoint"""
     return {"status": "healthy"}
 
-@app.get("/test-page", response_class=HTMLResponse)
-async def test_page(request: Request):
-    """Diagnostic test page for troubleshooting"""
-    context = get_common_context()
-    context["nav_info"]["current_path"] = "/test-page"
-    return templates.TemplateResponse("test-page.html", {"request": request, **context})
-
-@app.post("/api/summarize")
-async def api_summarize(request: Request):
-    try:
-        data = await request.json()
-        text = data.get("text", "")
-        length = data.get("length", "medium")
-        style = data.get("style", "informative")
-        
-        if not text:
-            return JSONResponse(content={"error": "No text provided"}, status_code=400)
-        
-        result = await gemini.summarize(text, length, style)
-        return JSONResponse(content=result)
-    except Exception as e:
-        logger.error(f"Error in summarization: {str(e)}")
-        return JSONResponse(content={"error": f"An error occurred: {str(e)}"}, status_code=500)
-
-# Run the application
+# Run the app with uvicorn when this file is executed directly
 if __name__ == "__main__":
-    # Add the catch-all route last, after all regular routes are defined
-    @app.get("/{path:path}")
-    async def catch_all(request: Request, path: str):
-        """Catch any invalid paths or URLs with hash fragments"""
-        # Check if path contains a hashtag or is not a valid route
-        if '#' in path or path.endswith('#') or path.endswith('/'):
-            # Extract the base path and redirect
-            base_path = path.split('#')[0].rstrip('/')
-            if not base_path:
-                return RedirectResponse(url="/", status_code=303)
-            return RedirectResponse(url=f"/{base_path}", status_code=303)
-        
-        # Try to render the page if it exists, otherwise redirect to home
-        try:
-            context = get_common_context()
-            return templates.TemplateResponse(f"{path}.html", {"request": request, **context})
-        except Exception as e:
-            logger.error(f"Error in catch_all route: {str(e)}")
-            return RedirectResponse(url="/", status_code=303)
-    
     import uvicorn
-    logger.info("Starting StudyWAI application")
-    uvicorn.run("app:app", host="0.0.0.0", port=5000, reload=True) 
+    uvicorn.run("app:app", host="0.0.0.0", port=1912, reload=True) 

@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <title>{% block title %}StudyWAI - AI Flashcards{% endblock %}</title>
+    
+    <!-- Header Fixer - Must be loaded first -->
+    <script src="{{ url_for('static', path='js/header-fixer.js') }}"></script>
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ url_for('static', path='img/favicon.ico') }}" type="image/x-icon">
@@ -35,16 +39,18 @@
 <body>
     <!-- Loading Spinner -->
     <div class="loading-container">
-        <div class="loading-spinner"></div>
+        <div class="loading-spinner" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
     </div>
     
     <!-- Mobile Navigation Toggle -->
-    <button class="mobile-nav-toggle">
-        <i class="fas fa-bars"></i>
+    <button class="mobile-nav-toggle" aria-label="Toggle sidebar navigation" aria-expanded="false" aria-controls="app-sidebar">
+        <i class="fas fa-bars" aria-hidden="true"></i>
     </button>
     
     <!-- Sidebar -->
-    <div class="app-sidebar">
+    <div class="app-sidebar" id="app-sidebar" role="navigation" aria-label="Main navigation">
         <div class="logo-container">
             <div class="logo-text">StudyWAI</div>
         </div>
@@ -52,49 +58,49 @@
         <div class="sidebar-nav">
             <div class="nav-item">
                 <a href="/" class="nav-link {{ nav_info.current_path == '/' and 'active' or '' }}">
-                    <i class="fas fa-layer-group"></i>
+                    <i class="fas fa-layer-group" aria-hidden="true"></i>
                     Flashcards
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="/create" class="nav-link {{ nav_info.current_path == '/create' and 'active' or '' }}">
-                    <i class="fas fa-plus"></i>
+                    <i class="fas fa-plus" aria-hidden="true"></i>
                     Create Cards
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="/study" class="nav-link {{ nav_info.current_path == '/study' and 'active' or '' }}">
-                    <i class="fas fa-book"></i>
+                    <i class="fas fa-book" aria-hidden="true"></i>
                     Study
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="/chatbot" class="nav-link {{ nav_info.current_path == '/chatbot' and 'active' or '' }}">
-                    <i class="fas fa-robot"></i>
+                    <i class="fas fa-robot" aria-hidden="true"></i>
                     AI Assistant
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="/translate" class="nav-link {{ nav_info.current_path == '/translate' and 'active' or '' }}">
-                    <i class="fas fa-language"></i>
+                    <i class="fas fa-language" aria-hidden="true"></i>
                     Translation
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="/grammar" class="nav-link {{ nav_info.current_path == '/grammar' and 'active' or '' }}">
-                    <i class="fas fa-spell-check"></i>
+                    <i class="fas fa-spell-check" aria-hidden="true"></i>
                     Grammar Checking
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="/summarize" class="nav-link {{ nav_info.current_path == '/summarize' and 'active' or '' }}">
-                    <i class="fas fa-compress-alt"></i>
+                    <i class="fas fa-compress-alt" aria-hidden="true"></i>
                     Summarize
                 </a>
             </div>
@@ -102,8 +108,8 @@
         
         <div class="sidebar-footer">
             <div class="dark-mode-toggle">
-                <button class="btn btn-sm btn-light w-100" id="dark-mode-toggle">
-                    <i class="fas {{ nav_info.dark_mode and 'fa-sun' or 'fa-moon' }} me-2"></i>
+                <button class="btn btn-sm btn-light w-100" id="dark-mode-toggle" aria-label="Toggle dark mode">
+                    <i class="fas {{ nav_info.dark_mode and 'fa-sun' or 'fa-moon' }} me-2" aria-hidden="true"></i>
                     {{ nav_info.dark_mode and 'Light Mode' or 'Dark Mode' }}
                 </button>
             </div>
@@ -126,8 +132,11 @@
                 {% if error %}
                 <div class="row mb-4">
                     <div class="col">
-                        <div class="flash-message alert alert-danger">
+                        <div class="flash-message alert alert-danger" role="alert">
                             {{ error }}
+                            <button type="button" class="close" aria-label="Close alert">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -136,8 +145,11 @@
                 {% if success %}
                 <div class="row mb-4">
                     <div class="col">
-                        <div class="flash-message alert alert-success">
+                        <div class="flash-message alert alert-success" role="alert">
                             {{ success }}
+                            <button type="button" class="close" aria-label="Close alert">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -175,6 +187,22 @@
     
     <!-- Debug Script - Added to fix frontend issues -->
     <script src="{{ url_for('static', path='js/debug.js') }}"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        // Register service worker for caching and header fixing
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/js/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered: ', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

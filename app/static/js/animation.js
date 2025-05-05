@@ -57,10 +57,8 @@ function initDarkMode() {
  * Initialize animations for various elements
  */
 function initAnimations() {
-    // Set up fade-in animations for various elements
+    // Initialize intersection observer for fade-in animations
     if ('IntersectionObserver' in window) {
-        const fadeElements = document.querySelectorAll('.fade-in-element');
-        
         const fadeObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -70,24 +68,38 @@ function initAnimations() {
             });
         }, { threshold: 0.1 });
         
+        // Get all elements that should fade in
+        const fadeElements = document.querySelectorAll('.fade-in-element');
         fadeElements.forEach(el => {
             fadeObserver.observe(el);
         });
     } else {
-        // Fallback for browsers that don't support IntersectionObserver
-        const fadeElements = document.querySelectorAll('.fade-in-element');
-        fadeElements.forEach(el => {
+        // Fallback for browsers without IntersectionObserver
+        document.querySelectorAll('.fade-in-element').forEach(el => {
             el.classList.add('fade-in');
         });
     }
     
-    // Add fade-in class to flashcard items with small delay between each
-    const flashcardItems = document.querySelectorAll('.flashcard-item');
-    flashcardItems.forEach((card, index) => {
-        setTimeout(() => {
-            card.classList.add('fade-in');
-        }, 50 * index);
+    // Mark all cards as fade-in elements
+    document.querySelectorAll('.card:not(.fade-in-element)').forEach(el => {
+        el.classList.add('fade-in-element');
     });
+    
+    // Add page transition class to the body
+    document.body.classList.add('page-transition');
+    
+    // Apply staggered animations to list elements
+    const animateLists = document.querySelectorAll('.animate-list');
+    animateLists.forEach(list => {
+        const items = list.children;
+        Array.from(items).forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+            item.classList.add('fade-in-element');
+        });
+    });
+    
+    // Fix CSS animations for better performance
+    fixCSSAnimations();
 }
 
 /**
@@ -303,4 +315,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // These animations are used across the site
     initTypingEffect();
     initHoverEffect();
-}); 
+});
+
+// Utility function to add animations to dynamically added elements
+function animateElement(element, animationType = 'fade-in') {
+    // Add appropriate class
+    element.classList.add('fade-in-element');
+    
+    // Force a reflow to ensure the animation works
+    void element.offsetWidth;
+    
+    // Add the animation class
+    element.classList.add(animationType);
+}
+
+// Prevent animation issues in some browsers
+function fixCSSAnimations() {
+    // Fix for Firefox and Safari animation issues
+    document.querySelectorAll('.fade-in, [class*="animate-"]').forEach(el => {
+        el.style.willChange = 'opacity, transform';
+        
+        // Clean up after animation completes
+        el.addEventListener('animationend', function() {
+            el.style.willChange = 'auto';
+        }, { once: true });
+    });
+} 

@@ -1,109 +1,102 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize components
-    initFlashcards();
-    initSidebar();
-    initFlashMessages();
-    initAnimations();
-    initDarkMode();
-    initForms();
-    initToolCards();
-    
-    // Remove loading screen if present
-    const loadingScreen = document.querySelector('.loading-container');
-    if (loadingScreen) {
-        setTimeout(() => {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.remove();
-            }, 300);
-        }, 300);
-    }
+/**
+ * Main JavaScript functionality for StudyWAI
+ */
+ 
+// Remove loading spinner when page is fully loaded
+window.addEventListener('load', function() {
+  const loadingContainer = document.querySelector('.loading-container');
+  if (loadingContainer) {
+    loadingContainer.style.opacity = '0';
+    setTimeout(() => {
+      loadingContainer.style.display = 'none';
+    }, 300);
+  }
 });
 
-/**
- * Initialize flashcard interactions
- */
-function initFlashcards() {
-    const flashcards = document.querySelectorAll('.flashcard');
-    
-    flashcards.forEach(card => {
-        card.addEventListener('click', function(e) {
-            // Don't flip if clicking on action buttons
-            if (e.target.closest('.flashcard-actions')) {
-                return;
-            }
-            
-            // Toggle flipped class
-            this.classList.toggle('flipped');
-        });
+// Handle flashcard flipping
+document.addEventListener('DOMContentLoaded', function() {
+  const flashcards = document.querySelectorAll('.flashcard');
+  
+  flashcards.forEach(card => {
+    card.addEventListener('click', function(e) {
+      // Don't flip if clicking action buttons
+      if (e.target.closest('.flashcard-actions') || 
+          e.target.closest('button') || 
+          e.target.closest('a')) {
+        return;
+      }
+      
+      this.classList.toggle('flipped');
+    });
+  });
+  
+  // Add accessibility support for keyboard navigation
+  const focusableElements = document.querySelectorAll('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+  
+  focusableElements.forEach(element => {
+    element.addEventListener('keydown', function(e) {
+      // Enter key
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        element.click();
+      }
     });
     
-    // Study mode navigation
-    const nextBtn = document.querySelector('.study-next');
-    const prevBtn = document.querySelector('.study-prev');
-    const studyContainer = document.querySelector('.study-container');
+    // Add keyboard-focus class for better focus styles
+    element.addEventListener('focus', function() {
+      this.classList.add('keyboard-focus');
+    });
     
-    if (nextBtn && prevBtn && studyContainer) {
-        let currentIndex = 0;
-        const totalCards = flashcards.length;
-        
-        // Update counter display
-        const updateCounter = () => {
-            const counter = document.querySelector('.study-counter');
-            if (counter) {
-                counter.textContent = `${currentIndex + 1}/${totalCards}`;
-            }
-        };
-        
-        // Show current card
-        const showCard = (index) => {
-            flashcards.forEach((card, i) => {
-                if (i === index) {
-                    card.style.display = 'block';
-                    // Reset flip state
-                    card.classList.remove('flipped');
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            updateCounter();
-        };
-        
-        // Initialize
-        if (totalCards > 0) {
-            showCard(0);
-        }
-        
-        // Next button
-        nextBtn.addEventListener('click', () => {
-            currentIndex = (currentIndex + 1) % totalCards;
-            showCard(currentIndex);
-        });
-        
-        // Previous button
-        prevBtn.addEventListener('click', () => {
-            currentIndex = (currentIndex - 1 + totalCards) % totalCards;
-            showCard(currentIndex);
-        });
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (document.querySelector('.study-container:focus-within')) {
-                if (e.key === 'ArrowRight') {
-                    nextBtn.click();
-                } else if (e.key === 'ArrowLeft') {
-                    prevBtn.click();
-                } else if (e.key === ' ' || e.key === 'Enter') {
-                    // Toggle flip with spacebar or enter
-                    const currentCard = flashcards[currentIndex];
-                    if (currentCard) {
-                        currentCard.classList.toggle('flipped');
-                    }
-                }
-            }
-        });
-    }
+    element.addEventListener('blur', function() {
+      this.classList.remove('keyboard-focus');
+    });
+    
+    // Remove keyboard-focus class on mouse click
+    element.addEventListener('mousedown', function() {
+      this.classList.remove('keyboard-focus');
+    });
+  });
+});
+
+// Add fade-in animations to elements
+const animateElements = () => {
+  const elementsToAnimate = document.querySelectorAll('.fade-in-element:not(.fade-in)');
+  
+  elementsToAnimate.forEach((element, index) => {
+    // Stagger animation with a small delay
+    setTimeout(() => {
+      element.classList.add('fade-in');
+    }, index * 100);
+  });
+};
+
+// Run animations when page loads and after dynamic content changes
+document.addEventListener('DOMContentLoaded', animateElements);
+
+// Helper function to format dates
+function formatDate(dateString) {
+  const options = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  
+  return new Date(dateString).toLocaleDateString(undefined, options);
 }
+
+// Initialize all date elements
+document.addEventListener('DOMContentLoaded', function() {
+  const dateElements = document.querySelectorAll('[data-date]');
+  
+  dateElements.forEach(element => {
+    const date = element.getAttribute('data-date');
+    if (date) {
+      element.textContent = formatDate(date);
+    }
+  });
+});
 
 /**
  * Initialize sidebar interactions
@@ -172,37 +165,6 @@ function initFlashMessages() {
             }, 300);
         }, 5000);
     });
-}
-
-/**
- * Initialize animations for elements
- */
-function initAnimations() {
-    // Elements that should fade in when visible
-    const fadeElements = document.querySelectorAll('.fade-in-element');
-    
-    if ('IntersectionObserver' in window) {
-        const fadeObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in');
-                    fadeObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        
-        fadeElements.forEach(el => {
-            fadeObserver.observe(el);
-        });
-    } else {
-        // Fallback for browsers that don't support IntersectionObserver
-        fadeElements.forEach(el => {
-            el.classList.add('fade-in');
-        });
-    }
-    
-    // Add page transition class to the body
-    document.body.classList.add('page-transition');
 }
 
 /**

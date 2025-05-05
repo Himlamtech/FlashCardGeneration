@@ -22,6 +22,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Enhance error handling
     enhanceErrorHandling();
+
+    // Find all buttons without text or aria-label
+    const buttonsWithoutText = Array.from(document.querySelectorAll('button'))
+        .filter(button => {
+            const hasText = button.innerText.trim().length > 0;
+            const hasAriaLabel = button.hasAttribute('aria-label');
+            const hasTitle = button.hasAttribute('title');
+            return !hasText && !hasAriaLabel && !hasTitle;
+        });
+
+    // Add aria-label to buttons with icons but no text
+    buttonsWithoutText.forEach(button => {
+        const icon = button.querySelector('i.fas, i.far, i.fab');
+        if (icon) {
+            const iconClass = icon.className.split(' ')
+                .find(cls => cls.startsWith('fa-'))?.replace('fa-', '') || 'button';
+            
+            // Convert iconClass to a readable label
+            const label = iconClass
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            
+            button.setAttribute('aria-label', label);
+            icon.setAttribute('aria-hidden', 'true');
+        } else {
+            button.setAttribute('aria-label', 'Button');
+        }
+    });
+
+    // Fix flash message close buttons if they don't have handlers
+    const closeButtons = document.querySelectorAll('.flash-message .close');
+    closeButtons.forEach(button => {
+        if (!button.onclick) {
+            button.onclick = function() {
+                const flashMessage = this.closest('.flash-message');
+                if (flashMessage) {
+                    flashMessage.style.display = 'none';
+                }
+            };
+        }
+    });
 });
 
 // Check if all required resources loaded properly
@@ -349,4 +391,98 @@ function fixCSSIssues() {
 }
 
 // Run CSS fixes after everything else
-setTimeout(fixCSSIssues, 500); 
+setTimeout(fixCSSIssues, 500);
+
+// Set proper browser headers for cache control
+function setCacheHeaders() {
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            action: 'add-cache-headers',
+            headers: {
+                'Cache-Control': 'public, max-age=31536000',
+                'X-Content-Type-Options': 'nosniff'
+            }
+        });
+    }
+}
+
+// Basic service worker for cache management
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/static/js/service-worker.js')
+            .then(function(registration) {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                setCacheHeaders();
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+    });
+}
+
+// Add mobile-specific behaviors
+const initMobileNav = () => {
+    const mobileToggle = document.querySelector('.mobile-nav-toggle');
+    const sidebar = document.querySelector('.app-sidebar');
+    
+    if (mobileToggle && sidebar) {
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+        });
+        
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('show') && 
+                !sidebar.contains(e.target) && 
+                e.target !== mobileToggle) {
+                sidebar.classList.remove('show');
+            }
+        });
+    }
+};
+
+// Initialize dark mode toggle
+const initDarkMode = () => {
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', () => {
+            const html = document.documentElement;
+            const isDarkMode = html.getAttribute('data-theme') === 'dark';
+            
+            // Toggle theme
+            html.setAttribute('data-theme', isDarkMode ? 'light' : 'dark');
+            
+            // Update button text and icon
+            const icon = darkModeToggle.querySelector('i');
+            if (icon) {
+                icon.className = isDarkMode ? 'fas fa-moon me-2' : 'fas fa-sun me-2';
+            }
+            
+            // Update text
+            darkModeToggle.innerHTML = isDarkMode ? 
+                `<i class="fas fa-moon me-2"></i>Dark Mode` : 
+                `<i class="fas fa-sun me-2"></i>Light Mode`;
+            
+            // Save preference to localStorage
+            localStorage.setItem('theme', isDarkMode ? 'light' : 'dark');
+        });
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Update button to match saved theme
+            const isDarkMode = savedTheme === 'dark';
+            darkModeToggle.innerHTML = isDarkMode ? 
+                `<i class="fas fa-sun me-2"></i>Light Mode` : 
+                `<i class="fas fa-moon me-2"></i>Dark Mode`;
+        }
+    }
+};
+
+// Initialize all features
+document.addEventListener('DOMContentLoaded', () => {
+    initMobileNav();
+    initDarkMode();
+}); 
